@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={quicksand.variable}>
-      <body className="min-h-screen bg-[#E2ECD5] text-[#3A432E] antialiased">
+      <body className="min-h-screen text-[#3A432E] antialiased">
         {children}
       </body>
     </html>
