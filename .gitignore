@@ -24,4 +24,8 @@ test-results
 apps/mobile-shell/dist
 docs
 !docs/
-!docs/**
+docs/*
+!docs/legacy/
+!docs/legacy/android-export-inventory.md
+!docs/superpowers/
+!docs/superpowers/**

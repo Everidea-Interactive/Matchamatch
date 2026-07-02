@@ -1,0 +1,7 @@
+{
+  "name": "@matchamatch/mobile-shell",
+  "private": true,
+  "scripts": {
+    "sync": "node -e \"console.error('apps/mobile-shell not scaffolded yet. Complete Task 8.'); process.exit(1)\""
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@matchamatch/web",
+  "private": true,
+  "scripts": {
+    "dev": "node -e \"console.error('apps/web not scaffolded yet. Complete Task 4.'); process.exit(1)\"",
+    "build": "node -e \"console.error('apps/web not scaffolded yet. Complete Task 4.'); process.exit(1)\"",
+    "test:e2e": "node -e \"console.error('apps/web E2E tests not scaffolded yet. Complete Task 4.'); process.exit(1)\""
+  }
+}
