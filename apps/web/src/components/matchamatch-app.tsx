@@ -15,10 +15,14 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
     applyScannerResult,
     onCupPress,
     profile,
+    recentUnlockedSkinIds,
     restartLevel,
+    scannerFeedbackKey,
     scannerFeedback,
     setActiveTab,
+    scorePulseKey,
     sortState,
+    sortFeedbackEvent,
     undoMove,
     useExtraCup,
   } = useMatchamatchApp();
@@ -67,43 +71,61 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
           : "mx-auto min-h-screen w-full max-w-md px-4 py-6"
       }
     >
-      <div className="rounded-[32px] border border-white/50 bg-white/45 p-4 shadow-[0_24px_80px_rgba(58,67,46,0.14)] backdrop-blur-sm">
+      <div className="mm-shell-in rounded-[32px] border border-white/50 bg-white/45 p-4 shadow-[0_24px_80px_rgba(58,67,46,0.14)] backdrop-blur-sm">
         <TopNav activeTab={activeTab} onTabChange={setActiveTab} />
-        {activeTab === "sort" ? (
-          <SortBoard
-            activeLevel={activeLevel}
-            onCupPress={onCupPress}
-            onRestart={restartLevel}
-            onUndo={undoMove}
-            onUsePowerUp={useExtraCup}
-            profile={profile}
-            sortState={sortState}
-          />
-        ) : (
-          <section className="space-y-4">
-            <ScannerPanel onResult={applyScannerResult} />
-            <div className="rounded-[24px] bg-white/70 p-4 shadow-sm">
-              <p className="text-sm font-medium text-[#4C5A3F]">
-                {scannerFeedback}
-              </p>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {SKINS.map((skin) => (
-                <article
-                  key={skin.id}
-                  className="rounded-2xl bg-white/70 p-3 text-center shadow-sm"
-                >
-                  <div className="text-2xl">
-                    {profile.unlockedSkins.includes(skin.id) ? skin.emoji : "🔒"}
-                  </div>
-                  <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.2em] text-[#3A432E]">
-                    {skin.name}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </section>
-        )}
+        <div key={activeTab} className="mm-panel-in">
+          {activeTab === "sort" ? (
+            <SortBoard
+              activeLevel={activeLevel}
+              onCupPress={onCupPress}
+              onRestart={restartLevel}
+              onUndo={undoMove}
+              onUsePowerUp={useExtraCup}
+              profile={profile}
+              scorePulseKey={scorePulseKey}
+              sortState={sortState}
+              sortFeedbackEvent={sortFeedbackEvent}
+            />
+          ) : (
+            <section className="space-y-4">
+              <ScannerPanel onResult={applyScannerResult} />
+              <div
+                key={`scanner-feedback-${scannerFeedbackKey}`}
+                className={`rounded-[24px] bg-white/70 p-4 shadow-sm ${
+                  scannerFeedbackKey > 0 ? "mm-feedback-in" : ""
+                }`}
+              >
+                <p className="text-sm font-medium text-[#4C5A3F]">
+                  {scannerFeedback}
+                </p>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {SKINS.map((skin) => {
+                  const isUnlocked = profile.unlockedSkins.includes(skin.id);
+                  const isRecentlyUnlocked = recentUnlockedSkinIds.includes(
+                    skin.id,
+                  );
+
+                  return (
+                    <article
+                      key={skin.id}
+                      className={`rounded-2xl bg-white/70 p-3 text-center shadow-sm transition-transform duration-300 ease-[var(--mm-ease-spring)] hover:-translate-y-0.5 ${
+                        isRecentlyUnlocked ? "mm-unlock-pop" : ""
+                      }`}
+                    >
+                      <div className={`text-2xl ${isRecentlyUnlocked ? "mm-score-pop" : ""}`}>
+                        {isUnlocked ? skin.emoji : "🔒"}
+                      </div>
+                      <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.2em] text-[#3A432E]">
+                        {skin.name}
+                      </p>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+        </div>
       </div>
     </main>
   );

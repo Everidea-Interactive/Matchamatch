@@ -1,7 +1,7 @@
 import type { Cup, SortState } from "./types";
 
 const CUP_CAPACITY = 3;
-const INITIAL_MESSAGE = "Tap a cup to select, then tap another to pour.";
+export const INITIAL_SORT_MESSAGE = "Tap a cup to select, then tap another to pour.";
 const MISMATCH_MESSAGE =
   "Mismatched ingredients! Pour onto matching colors only.";
 const FULL_CUP_MESSAGE = "Oops! That glass is full.";
@@ -19,7 +19,7 @@ export function createSortState(seedCups: Cup[]): SortState {
     selectedCupIndex: null,
     hasAddedCup: false,
     history: [],
-    message: INITIAL_MESSAGE,
+    message: INITIAL_SORT_MESSAGE,
   };
 }
 

@@ -1,11 +1,11 @@
 import type { LevelDefinition, SkinDefinition } from "./types";
 
 export const COLORS = {
-  matcha: "#76895C",
-  milk: "#F8F9F3",
-  strawberry: "#E8A2A5",
-  lavender: "#C3B1E1",
-  chocolate: "#8B5A2B",
+  matcha: "#556C38",
+  milk: "#D4C898",
+  strawberry: "#B6CD85",
+  lavender: "#8EA766",
+  chocolate: "#6E8750",
 } as const;
 
 export const LEVELS: LevelDefinition[] = [

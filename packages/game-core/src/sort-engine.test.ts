@@ -19,8 +19,8 @@ describe("sort-engine", () => {
     ]);
     const result = attemptPour(state, 0, 1);
 
-    expect(result.cups[0]).toEqual(["#76895C"]);
-    expect(result.cups[1]).toEqual(["#F8F9F3", "#F8F9F3", "#F8F9F3"]);
+    expect(result.cups[0]).toEqual([COLORS.matcha]);
+    expect(result.cups[1]).toEqual([COLORS.milk, COLORS.milk, COLORS.milk]);
     expect(result.message).toBe("Satisfying pour! Keep it up.");
   });
 
@@ -61,8 +61,8 @@ describe("sort-engine", () => {
   it("detects solved board", () => {
     expect(
       checkWin([
-        ["#76895C", "#76895C", "#76895C"],
-        ["#F8F9F3", "#F8F9F3", "#F8F9F3"],
+        [COLORS.matcha, COLORS.matcha, COLORS.matcha],
+        [COLORS.milk, COLORS.milk, COLORS.milk],
         [],
       ]),
     ).toBe(true);

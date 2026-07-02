@@ -60,12 +60,17 @@ export function ScannerPanel({
     }
   }
 
+  const isScannerActive = status === "Scanner Active";
+
   return (
-    <section className="rounded-[28px] bg-[#3A432E] p-4 text-white shadow-[0_20px_50px_rgba(58,67,46,0.22)]">
-      <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#D7E3CA]">
+    <section className="mm-card-sheen rounded-[28px] bg-[#3A432E] p-4 text-white shadow-[0_20px_50px_rgba(58,67,46,0.22)]">
+      <p
+        key={status}
+        className="mm-feedback-in mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#D7E3CA]"
+      >
         {status}
       </p>
-      <div className="mb-3 aspect-[4/3] overflow-hidden rounded-2xl border border-white/10 bg-black/80">
+      <div className="relative mb-3 aspect-[4/3] overflow-hidden rounded-2xl border border-white/10 bg-black/80">
         <video
           ref={videoRef}
           autoPlay
@@ -73,17 +78,24 @@ export function ScannerPanel({
           muted
           playsInline
         />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(212,227,202,0.18),transparent_58%)]" />
+        {isScannerActive ? (
+          <div
+            aria-hidden="true"
+            className="mm-scan-line pointer-events-none absolute inset-x-3 top-0 h-10 rounded-full bg-[linear-gradient(180deg,rgba(215,227,202,0.2),rgba(215,227,202,0))] blur-sm"
+          />
+        ) : null}
         <canvas ref={canvasRef} className="hidden" />
       </div>
       <div className="flex gap-2">
         <button
-          className="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white"
+          className="mm-button rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white"
           onClick={() => void startCamera()}
           type="button"
         >
           Start Camera
         </button>
-        <label className="cursor-pointer rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[#3A432E]">
+        <label className="mm-button cursor-pointer rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[#3A432E]">
           Upload
           <input
             accept="image/*"

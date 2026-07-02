@@ -18,6 +18,27 @@ test("player can complete basic sort interactions", async ({ page }) => {
   await expect(page.getByText("Undo applied! Keep sorting.")).toBeVisible();
 });
 
+test("tab switch clears pending sort selection state", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByTestId("cup-0").click();
+  await expect(page.getByTestId("cup-0")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+
+  await page.getByRole("button", { name: "Go" }).click();
+  await page.getByRole("button", { name: "Sort" }).click();
+
+  await expect(page.getByTestId("cup-0")).toHaveAttribute(
+    "aria-pressed",
+    "false",
+  );
+  await expect(
+    page.getByText("Tap a cup to select, then tap another to pour."),
+  ).toBeVisible();
+});
+
 test("winning level 1 loads fresh level 2 board", async ({ page }) => {
   await page.goto("/");
 

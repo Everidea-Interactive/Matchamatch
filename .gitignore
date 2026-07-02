@@ -19,6 +19,7 @@ debug.keystore
 node_modules
 .next
 out
+.superpowers
 playwright-report
 test-results
 apps/mobile-shell/dist
