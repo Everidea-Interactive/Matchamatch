@@ -69,10 +69,10 @@ export function useMatchamatchApp() {
     didResetToLevelOne: boolean,
   ) {
     if (didResetToLevelOne) {
-      return "Move limit reached! Retry budget refilled. Tap Try Again for Cafe Level 1.";
+      return "Move limit reached! Retry budget refilled. Back to Cafe Level 1.";
     }
 
-    return `Move limit reached! ${failedProfile.retryBudgetRemaining} retries left. Tap Try Again.`;
+    return `Move limit reached! ${failedProfile.retryBudgetRemaining} retries left.`;
   }
 
   function emitSortFeedback(

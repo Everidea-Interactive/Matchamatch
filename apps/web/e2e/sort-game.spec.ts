@@ -166,9 +166,12 @@ test("failed level locks board and Try Again resets same level with spent retry"
 
   await playMoves(page, LEVEL_ONE_FAILURE_MOVES);
 
-  await expect(
-    page.getByText("Move limit reached! 2 retries left. Tap Try Again."),
-  ).toBeVisible();
+  const failureDialog = page.getByRole("dialog", {
+    name: "Move limit reached",
+  });
+
+  await expect(failureDialog).toBeVisible();
+  await expect(failureDialog).toContainText("2 retries left.");
   await expect(page.getByTestId("moves-counter")).toHaveText(/Moves\s*8 \/ 8/);
   await expect(page.getByTestId("retry-counter")).toHaveText(
     /Retries Left\s*2/,
@@ -176,9 +179,9 @@ test("failed level locks board and Try Again resets same level with spent retry"
   await expect(page.getByTestId("cup-0")).toBeDisabled();
   await expect(page.getByRole("button", { name: "Undo" })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Restart" })).toBeDisabled();
-  await expect(page.getByRole("button", { name: "Try Again" })).toBeEnabled();
+  await expect(page.getByRole("button", { name: "Retry" })).toBeEnabled();
 
-  await page.getByRole("button", { name: "Try Again" }).click();
+  await page.getByRole("button", { name: "Retry" }).click();
 
   await expect(page.getByText("Cafe Level 1")).toBeVisible();
   await expect(page.getByTestId("moves-counter")).toHaveText(/Moves\s*0 \/ 8/);
@@ -212,11 +215,14 @@ test("third failed attempt refills retries and sends player back to level 1", as
 
   await playMoves(page, LEVEL_FOUR_FAILURE_MOVES);
 
-  await expect(
-    page.getByText(
-      "Move limit reached! Retry budget refilled. Tap Try Again for Cafe Level 1.",
-    ),
-  ).toBeVisible();
+  const failureDialog = page.getByRole("dialog", {
+    name: "Move limit reached",
+  });
+
+  await expect(failureDialog).toBeVisible();
+  await expect(failureDialog).toContainText(
+    "Retry budget refilled. Back to Cafe Level 1.",
+  );
   await expect(page.getByTestId("moves-counter")).toHaveText(
     /Moves\s*12 \/ 12/,
   );
@@ -224,7 +230,7 @@ test("third failed attempt refills retries and sends player back to level 1", as
     /Retries Left\s*3/,
   );
 
-  await page.getByRole("button", { name: "Try Again" }).click();
+  await page.getByRole("button", { name: "Retry" }).click();
 
   await expect(page.getByText("Cafe Level 1")).toBeVisible();
   await expect(page.getByText("Warm Up Matcha")).toBeVisible();
