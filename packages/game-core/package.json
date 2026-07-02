@@ -2,7 +2,10 @@
   "name": "@matchamatch/game-core",
   "private": true,
   "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
-    "test": "node -e \"console.error('packages/game-core not scaffolded yet. Complete Task 2.'); process.exit(1)\""
+    "test": "vitest run"
   }
 }
