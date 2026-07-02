@@ -1,0 +1,6 @@
+{
+  "name": "Matchamatch",
+  "description": "Relaxing, ASMR-inspired liquid sorting puzzle game with a soft, minimalist Matcha Girl pastel aesthetic.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

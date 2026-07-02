@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Matchamatch - ASMR Sorting Puzzle</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Lora:ital,wght@0,500;1,400&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background-color: #E2ECD5;
+      color: #3A432E;
+      user-select: none;
+      -webkit-user-select: none;
+      overflow: hidden;
+    }
+    .serif-font {
+      font-family: 'Lora', serif;
+    }
+    .accent-font {
+      font-family: 'Comfortaa', sans-serif;
+    }
+    
+    /* Falling leaf background animation */
+    .leaf-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .leaf {
+      position: absolute;
+      background-color: rgba(118, 137, 92, 0.2);
+      border-radius: 0 100% 0 100%;
+      width: 14px;
+      height: 14px;
+      animation: fall 12s linear infinite;
+    }
+    @keyframes fall {
+      0% {
+        transform: translateY(-20px) translateX(0) rotate(0deg);
+        opacity: 0;
+      }
+      10% { opacity: 0.7; }
+      90% { opacity: 0.7; }
+      100% {
+        transform: translateY(105vh) translateX(100px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Bold Glass cup design */
+    .glass-cup {
+      position: relative;
+      width: 72px;
+      height: 156px;
+      border: 3px solid rgba(58, 67, 46, 0.25);
+      border-top: none;
+      border-bottom-left-radius: 24px;
+      border-bottom-right-radius: 24px;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      background: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 10px 24px rgba(58, 67, 46, 0.05), inset 0 0 14px rgba(255, 255, 255, 0.45);
+      transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      cursor: pointer;
+    }
+    .glass-cup.cup-empty {
+      border-style: dashed;
+    }
+    
+    /* Glossy reflection highlight on the cups */
+    .glass-highlight {
+      position: absolute;
+      top: 8px;
+      left: 12px;
+      width: 4px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.35);
+      border-radius: 9999px;
+      pointer-events: none;
+      z-index: 4;
+    }
+    
+    .glass-rim-reflection {
+      position: absolute;
+      top: -3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 16px;
+      height: 6px;
+      background: rgba(58, 67, 46, 0.15);
+      border-radius: 9999px;
+      filter: blur(1.5px);
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    /* Liquid blocks - fitting perfectly inside the flex container */
+    .liquid-block {
+      width: 100%;
+      height: 33.33%;
+      border-top: 1.5px solid rgba(0, 0, 0, 0.04);
+      transition: all 0.4s ease;
+      box-shadow: inset 0 6px 10px rgba(255, 255, 255, 0.22), inset 0 -6px 10px rgba(0, 0, 0, 0.08);
+    }
+    
+    /* Pulsing Selected State using design offset ring */
+    .selected-cup {
+      transform: translateY(-22px);
+      box-shadow: 0 18px 32px rgba(118, 137, 92, 0.3), inset 0 0 16px rgba(255, 255, 255, 0.6);
+      border-color: #3A432E;
+      ring: 4px solid #76895C;
+      outline: 4px solid #76895C;
+      outline-offset: 4px;
+    }
+
+    /* Bamboo Whisk overlay animation */
+    .whisk-overlay {
+      position: absolute;
+      top: -65px;
+      left: 50%;
+      transform: translateX(-50%) rotate(0deg);
+      width: 44px;
+      height: 60px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 10;
+    }
+    .whisk-spinning {
+      opacity: 1;
+      animation: whiskStir 1.2s ease-in-out forwards;
+    }
+    @keyframes whiskStir {
+      0% { transform: translateX(-50%) translateY(-20px) rotate(0deg); }
+      20% { transform: translateX(-40%) translateY(15px) rotate(-15deg); }
+      40% { transform: translateX(-60%) translateY(15px) rotate(15deg); }
+      60% { transform: translateX(-40%) translateY(20px) rotate(-15deg); }
+      80% { transform: translateX(-50%) translateY(15px) rotate(0deg); }
+      100% { transform: translateX(-50%) translateY(-50px) rotate(360deg); opacity: 0; }
+    }
+
+    /* Tea splash particle */
+    .particle {
+      position: absolute;
+      pointer-events: none;
+      border-radius: 50%;
+      z-index: 20;
+      animation: splash 0.7s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+    }
+    @keyframes splash {
+      0% { transform: translate(0, 0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--dx), var(--dy)) scale(0.3); opacity: 0; }
+    }
+
+    /* Custom CSS pour stream */
+    .stream-line {
+      position: absolute;
+      pointer-events: none;
+      width: 8px;
+      z-index: 5;
+      border-radius: 4px;
+      transform-origin: top center;
+      box-shadow: inset 1.5px 0 3px rgba(255, 255, 255, 0.5);
+      animation: flowStream 0.5s ease-out forwards;
+    }
+    @keyframes flowStream {
+      0% { height: 0; opacity: 1; }
+      100% { opacity: 0.95; }
+    }
+
+    /* Voucher Ticket Cutouts */
+    .ticket-edge {
+      background-image: radial-gradient(circle at 0px 8px, transparent 8px, white 8px);
+      background-size: 100% 16px;
+    }
+
+    /* SKINS CONFIGURATION */
+    .skin-zen {
+      border-color: rgba(58, 67, 46, 0.25);
+      background: rgba(255, 255, 255, 0.25);
+    }
+    .skin-sakura {
+      border-color: rgba(232, 162, 165, 0.6) !important;
+      background: rgba(255, 240, 240, 0.45) !important;
+      box-shadow: 0 10px 24px rgba(232, 162, 165, 0.15), inset 0 0 14px rgba(255, 255, 255, 0.5) !important;
+    }
+    .skin-sakura::after {
+      content: '🌸';
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      font-size: 11px;
+      opacity: 0.8;
+      z-index: 3;
+    }
+    .skin-bamboo {
+      border-color: rgba(118, 137, 92, 0.6) !important;
+      background: rgba(240, 245, 235, 0.45) !important;
+      border-left-width: 4px !important;
+      border-right-width: 4px !important;
+    }
+    .skin-bamboo::after {
+      content: '🎋';
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      font-size: 11px;
+      opacity: 0.8;
+      z-index: 3;
+    }
+    .skin-golden {
+      border-color: rgba(212, 175, 55, 0.7) !important;
+      background: rgba(255, 253, 240, 0.45) !important;
+      box-shadow: 0 10px 24px rgba(212, 175, 55, 0.15), inset 0 0 14px rgba(255, 255, 255, 0.6) !important;
+    }
+    .skin-golden::after {
+      content: '⭐';
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      font-size: 11px;
+      opacity: 0.8;
+      z-index: 3;
+    }
+    .skin-emerald {
+      border-color: rgba(16, 124, 65, 0.5) !important;
+      background: rgba(220, 240, 225, 0.45) !important;
+      box-shadow: 0 10px 24px rgba(16, 124, 65, 0.1), inset 0 0 14px rgba(255, 255, 255, 0.5) !important;
+    }
+    .skin-emerald::after {
+      content: '🍃';
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      font-size: 11px;
+      opacity: 0.8;
+      z-index: 3;
+    }
+
+    /* Scanning animations */
+    .laser-line {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: #76895C;
+      box-shadow: 0 0 12px #76895C, 0 0 4px #76895C;
+      animation: laserScan 2s linear infinite;
+      z-index: 10;
+    }
+    @keyframes laserScan {
+      0% { top: 0%; }
+      50% { top: 100%; }
+      100% { top: 0%; }
+    }
+    .scanner-active {
+      box-shadow: 0 0 20px rgba(118, 137, 92, 0.6);
+      border-color: #76895C !important;
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-between min-h-screen p-6 relative overflow-hidden select-none bg-[#E2ECD5] font-sans">
+
+  <!-- Floating Leaves Background -->
+  <div class="leaf-container" id="leafContainer"></div>
+
+  <!-- Background circular watermark decoration -->
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-5 pointer-events-none z-0">
+    <div class="w-80 h-80 border-[16px] border-[#3A432E] rounded-full"></div>
+  </div>
+
+  <!-- Header Section with bold levels and layout matching the design -->
+  <header class="w-full text-center z-10 pt-4 flex flex-col items-center max-w-sm">
+    <div class="w-full flex items-center justify-between px-2">
+      <div class="flex flex-col text-left">
+        <span class="text-[10px] uppercase tracking-[0.2em] text-[#5D6B4A] font-bold opacity-80" id="headerLevelLabel">Cafe Level 1</span>
+        <h1 class="text-3xl font-black text-[#3A432E] tracking-tighter leading-none mt-1">MATCHAMATCH</h1>
+      </div>
+      <!-- Info Button -->
+      <div class="w-12 h-12 rounded-full bg-white/40 border border-white/60 flex items-center justify-center shadow-sm active:scale-95 transition" onclick="showTipMessage()">
+        <span class="text-[#3A432E] text-xl font-bold italic">?</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Elegant Navigation Tab Selector -->
+  <div class="w-full max-w-sm flex bg-[#3A432E]/10 rounded-2xl p-1 mt-3 mb-1 z-10 font-bold text-xs shadow-inner">
+    <button id="tabSort" class="flex-1 py-2.5 rounded-xl transition duration-200 text-[#3A432E] bg-white shadow-sm" onclick="switchTab('sort')">
+      🍵 Sort Game
+    </button>
+    <button id="tabGo" class="flex-1 py-2.5 rounded-xl transition duration-200 text-[#5D6B4A]" onclick="switchTab('go')">
+      📸 Matcha Go
+    </button>
+  </div>
+
+  <!-- Sort Game View Container -->
+  <div id="sortGameView" class="w-full flex-grow flex flex-col justify-center items-center z-10">
+    <!-- Game Playfield Area -->
+    <main class="w-full flex-grow flex flex-col justify-center items-center z-10 my-2">
+      <!-- Level Card Container -->
+      <div class="w-full max-w-sm bg-white/20 border-2 border-[#3A432E]/10 backdrop-blur-md rounded-3xl p-5 shadow-sm flex flex-col items-center relative">
+        
+        <!-- Top Action Bar with modern circular buttons styled like the design -->
+        <div class="w-full flex justify-between items-center mb-6 px-2">
+          <button id="btnRestart" class="w-11 h-11 rounded-2xl bg-white border border-[#3A432E]/25 flex items-center justify-center shadow-sm text-[#3A432E] font-bold hover:bg-slate-50 transition active:scale-95" onclick="restartLevel()" title="Restart Game">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+          </button>
+          <div class="text-xs uppercase tracking-widest font-black text-[#5D6B4A] opacity-90">Liquid Sort</div>
+          <button id="btnUndo" class="w-11 h-11 rounded-2xl bg-[#3A432E] flex items-center justify-center shadow-md text-white hover:bg-[#2C3322] disabled:opacity-30 disabled:pointer-events-none transition active:scale-95" disabled onclick="undoMove()" title="Undo Move">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/></svg>
+          </button>
+        </div>
+
+        <!-- Level Selector Controls -->
+        <div class="flex items-center justify-between w-full mb-6 px-1 z-10">
+          <button class="w-8 h-8 rounded-full bg-[#3A432E]/10 flex items-center justify-center font-black text-[#3A432E] hover:bg-[#3A432E]/20 transition" onclick="prevLevel()">◀</button>
+          <div class="text-center flex flex-col">
+            <span class="text-[9px] font-bold text-[#5D6B4A] uppercase tracking-wider">Order Recipe</span>
+            <span class="text-xs font-black text-[#3A432E] uppercase tracking-wide mt-0.5" id="currentLevelName">Warm Up Matcha</span>
+          </div>
+          <button class="w-8 h-8 rounded-full bg-[#3A432E]/10 flex items-center justify-center font-black text-[#3A432E] hover:bg-[#3A432E]/20 transition" onclick="nextLevel()">▶</button>
+        </div>
+
+        <!-- Glasses Container -->
+        <div class="flex justify-center items-end gap-6 min-h-[180px] mb-6 w-full relative" id="cupsContainer">
+          <!-- Cups are rendered here by JavaScript -->
+        </div>
+
+        <!-- Interactive Helper Message -->
+        <p class="text-xs text-[#5D6B4A] text-center font-bold italic tracking-wide px-4" id="helperMessage">
+          Tap a cup to select, then tap another to pour.
+        </p>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Matcha Go AR Scanning and Rewards View -->
+  <div id="matchaGoView" class="w-full flex-grow flex flex-col justify-start items-center z-10 my-4 hidden">
+    <!-- Matcha Go Card Container -->
+    <div class="w-full max-w-sm bg-white/20 border-2 border-[#3A432E]/10 backdrop-blur-md rounded-3xl p-5 shadow-sm flex flex-col items-center relative">
+      
+      <!-- Daily Mission Header Stats Bar -->
+      <div class="w-full grid grid-cols-3 gap-2 mb-4 bg-[#3A432E]/5 rounded-2xl p-2.5 text-center text-[#3A432E]">
+        <div>
+          <p class="text-[9px] uppercase tracking-wider text-[#5D6B4A] font-black opacity-75">Daily Score</p>
+          <p class="text-xs font-black mt-0.5"><span id="statsScore">0</span> pts</p>
+        </div>
+        <div class="border-x border-[#3A432E]/10">
+          <p class="text-[9px] uppercase tracking-wider text-[#5D6B4A] font-black opacity-75">Streak</p>
+          <p class="text-xs font-black mt-0.5 text-orange-600"><span id="statsStreak">1</span> Days 🔥</p>
+        </div>
+        <div>
+          <p class="text-[9px] uppercase tracking-wider text-[#5D6B4A] font-black opacity-75">Unlocked Skins</p>
+          <p class="text-xs font-black mt-0.5"><span id="statsUnlocked">1</span>/5</p>
+        </div>
+      </div>
+
+      <!-- Interactive Scanning Area -->
+      <div class="w-full aspect-[4/3] bg-black/90 rounded-2xl overflow-hidden relative border-2 border-[#3A432E]/20 shadow-inner flex items-center justify-center" id="scannerViewport">
+        
+        <!-- HTML5 Live Video Feed -->
+        <video id="scanVideo" autoplay playsinline muted class="absolute inset-0 w-full h-full object-cover hidden z-1"></video>
+        
+        <!-- Fallback Camera Placeholder / Instruction -->
+        <div id="scannerFallback" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-white/80 z-2">
+          <span class="text-4xl mb-2">📷</span>
+          <p class="text-xs font-bold uppercase tracking-widest text-[#76895C] mb-1">Matcha Go Capture</p>
+          <p class="text-[11px] max-w-[220px]">Point camera at a real Matcha cup or upload an image to run the AI color extraction scanner.</p>
+        </div>
+
+        <!-- Scanning HUD overlays -->
+        <div class="absolute inset-0 border-[16px] border-black/40 pointer-events-none z-3"></div>
+        <!-- Scanner horizontal scanning laser -->
+        <div id="scannerLaser" class="laser-line hidden"></div>
+        <!-- Scanning Reticle corners -->
+        <div class="absolute top-6 left-6 w-5 h-5 border-t-2 border-l-2 border-[#76895C] pointer-events-none z-3"></div>
+        <div class="absolute top-6 right-6 w-5 h-5 border-t-2 border-r-2 border-[#76895C] pointer-events-none z-3"></div>
+        <div class="absolute bottom-6 left-6 w-5 h-5 border-b-2 border-l-2 border-[#76895C] pointer-events-none z-3"></div>
+        <div class="absolute bottom-6 right-6 w-5 h-5 border-b-2 border-r-2 border-[#76895C] pointer-events-none z-3"></div>
+
+        <!-- Overlay canvas for capture flash and visual analysis rendering -->
+        <canvas id="scanCanvas" class="absolute inset-0 w-full h-full object-cover hidden z-4"></canvas>
+
+        <!-- Real-time analysis status pill -->
+        <div class="absolute top-4 left-1/2 -translate-x-1/2 bg-[#3A432E] border border-[#76895C]/50 px-3 py-1 rounded-full text-[9px] uppercase font-bold tracking-widest text-white flex items-center gap-1.5 shadow-md z-10">
+          <span class="w-2 h-2 rounded-full bg-red-500 animate-ping" id="scanStatusDot"></span>
+          <span id="scanStatusText">Camera Ready</span>
+        </div>
+      </div>
+
+      <!-- Capture Controllers -->
+      <div class="w-full flex gap-3 mt-4">
+        <button class="flex-1 py-3 bg-[#3A432E] hover:bg-[#2C3322] text-white font-black rounded-xl text-xs uppercase tracking-wider shadow-md transition active:scale-95" onclick="triggerScanning()">
+          ⚡ Capture Cup
+        </button>
+        <!-- Custom Photo selector fallback input -->
+        <label class="w-12 h-12 rounded-xl bg-white border border-[#3A432E]/25 flex items-center justify-center shadow-sm cursor-pointer hover:bg-slate-50 active:scale-95 transition">
+          <input type="file" id="scanInput" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
+          <span class="text-lg">📁</span>
+        </label>
+      </div>
+
+      <!-- Custom Skin Unlocks Gallery -->
+      <div class="w-full mt-5">
+        <h3 class="text-xs font-black uppercase tracking-wider text-[#3A432E] mb-2 text-left">Custom Cup Skins</h3>
+        <div class="flex gap-3 overflow-x-auto pb-1.5 px-0.5 scrollbar-none" id="skinsContainer" style="-webkit-overflow-scrolling: touch;">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer Actions - Upgraded with the Beautiful Current Order Bar from the Design theme! -->
+  <footer class="w-full max-w-sm text-center z-10 pb-4 flex flex-col items-center">
+    
+    <!-- Bold Current Order & Power-Up Integration -->
+    <div class="w-full bg-[#3A432E] rounded-3xl p-4 shadow-xl flex items-center justify-between mb-4">
+      <div class="flex items-center space-x-3 text-left">
+        <div class="w-10 h-10 bg-[#76895C] rounded-xl flex items-center justify-center text-white text-xl">🍵</div>
+        <div>
+          <p class="text-white/60 text-[9px] font-bold uppercase tracking-wider">Active Recipe</p>
+          <p class="text-white text-sm font-semibold leading-tight" id="activeRecipeFooter">Matcha Silk Latte</p>
+        </div>
+      </div>
+      <!-- Power-Up embedded cleanly in order card -->
+      <button id="btnPowerUp" class="px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/20 text-xs font-bold transition active:scale-95" onclick="usePowerUp()">
+        + Clean Glass
+      </button>
+    </div>
+
+    <p class="text-[9px] text-[#5D6B4A]/80 font-black uppercase tracking-widest mt-1">
+      ASMR Whisking Experience • Cafe Brand Activation
+    </p>
+  </footer>
+
+  <!-- WIN OVERLAY MODAL -->
+  <div id="winModal" class="fixed inset-0 bg-[#32452A]/65 backdrop-blur-sm flex items-center justify-center p-6 z-50 opacity-0 pointer-events-none transition-all duration-500">
+    <div class="bg-[#FAF8F2] w-full max-w-sm rounded-3xl p-7 border border-white shadow-2xl text-center transform scale-90 transition-all duration-500 flex flex-col items-center" id="winCard">
+      <!-- Success Icon -->
+      <div class="w-16 h-16 bg-[#E2ECD5] border-2 border-[#8BB38D] rounded-full flex items-center justify-center text-3xl mb-4 animate-bounce">
+        🍵
+      </div>
+      <!-- Success Typography -->
+      <h2 class="text-2xl font-bold text-[#32452A] accent-font">Order Up!</h2>
+      <p class="text-[#4C6443] serif-font italic text-sm mt-1.5 px-3">
+        You've whisked a perfect match.
+      </p>
+      
+      <!-- Visual Highlight card -->
+      <div class="w-full bg-[#EAF2DE] border border-[#CBDCB2] rounded-2xl p-4 my-6 text-left">
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="text-[10px] uppercase font-bold text-[#708F5D] tracking-widest">BARISTA REWARD</p>
+            <h4 class="text-lg font-bold text-[#32452A] mt-0.5 leading-tight">Matcha Matcha Free Upgrade</h4>
+          </div>
+          <span class="text-2xl">✨</span>
+        </div>
+        <p class="text-xs text-[#5A744C] mt-2 leading-relaxed">
+          Unlock a complimentary double-whisk milk frother upgrade at any participating bar.
+        </p>
+      </div>
+
+      <!-- Action Button -->
+      <button class="w-full py-4 bg-[#638450] hover:bg-[#526F41] text-white font-bold rounded-xl shadow-md transition active:scale-98 text-sm uppercase tracking-wider" onclick="claimUpgrade()">
+        Claim Free Upgrade
+      </button>
+    </div>
+  </div>
+
+  <!-- REWARD SCREEN OVERLAY -->
+  <div id="rewardScreen" class="fixed inset-0 bg-[#E2ECD5] flex flex-col items-center justify-between p-6 z-50 opacity-0 pointer-events-none transition-all duration-500">
+    <div class="leaf-container"></div>
+    
+    <!-- Voucher Header -->
+    <header class="w-full text-center z-10 pt-4 flex flex-col items-center">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/60 border border-[#BED2A7] rounded-full text-xs font-semibold uppercase tracking-wider text-[#546E44] shadow-sm accent-font">
+        🎟️ Exclusive Reward Unlocked
+      </div>
+      <h2 class="text-2xl font-extrabold text-[#32452A] mt-3 tracking-tight accent-font">Your Reward</h2>
+    </header>
+
+    <!-- Ticket Voucher Box -->
+    <main class="w-full max-w-xs bg-white rounded-3xl shadow-xl border border-dashed border-[#B8D0A0] overflow-hidden flex flex-col items-center z-10">
+      
+      <!-- Top Half of Ticket -->
+      <div class="w-full bg-[#759E61] p-6 text-center text-white flex flex-col items-center relative">
+        <div class="text-4xl mb-2">🍵</div>
+        <h3 class="text-xl font-black accent-font tracking-wide">FREE OAT MILK</h3>
+        <p class="text-[10px] tracking-widest uppercase font-bold text-[#D0E2C8] mt-1">Upgrade Voucher</p>
+        
+        <!-- Ticket cutouts left/right -->
+        <div class="absolute -bottom-3 -left-3 w-6 h-6 bg-[#E2ECD5] rounded-full border border-transparent"></div>
+        <div class="absolute -bottom-3 -right-3 w-6 h-6 bg-[#E2ECD5] rounded-full border border-transparent"></div>
+      </div>
+
+      <!-- Bottom Half containing QR code -->
+      <div class="w-full bg-white px-6 py-8 flex flex-col items-center text-center">
+        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-4">Scan at barista counter</p>
+        
+        <!-- Beautiful QR Code Vector Grid -->
+        <div class="w-36 h-36 bg-[#F3F6EF] border-4 border-[#C8DAB4] rounded-2xl p-2.5 flex items-center justify-center relative shadow-inner">
+          <svg class="w-full h-full text-[#3E5136]" viewBox="0 0 29 29" fill="currentColor">
+            <!-- QR Borders and corners -->
+            <path d="M0,0 h7 v1 h-6 v6 h-1 z" />
+            <path d="M0,22 h1 v6 h6 v1 h-7 z" />
+            <path d="M22,0 h7 v7 h-1 v-6 h-6 z" />
+            <path d="M28,22 h1 v7 h-7 v-1 h6 z" />
+            <!-- Finder pattern Top-Left -->
+            <path d="M2,2 h5 v5 h-5 z M3,3 h3 v3 h-3 z" />
+            <!-- Finder pattern Top-Right -->
+            <path d="M22,2 h5 v5 h-5 z M23,3 h3 v3 h-3 z" />
+            <!-- Finder pattern Bottom-Left -->
+            <path d="M2,22 h5 v5 h-5 z M3,23 h3 v3 h-3 z" />
+            <!-- Simulated QR pixels grid -->
+            <rect x="10" y="2" width="2" height="2" />
+            <rect x="14" y="2" width="4" height="2" />
+            <rect x="10" y="6" width="3" height="1" />
+            <rect x="15" y="5" width="2" height="3" />
+            <rect x="2" y="10" width="3" height="2" />
+            <rect x="7" y="12" width="2" height="4" />
+            <rect x="11" y="10" width="5" height="2" />
+            <rect x="18" y="10" width="3" height="3" />
+            <rect x="23" y="11" width="4" height="2" />
+            <rect x="12" y="14" width="4" height="2" />
+            <rect x="18" y="15" width="2" height="2" />
+            <rect x="2" y="18" width="4" height="2" />
+            <rect x="8" y="18" width="2" height="2" />
+            <rect x="13" y="18" width="3" height="3" />
+            <rect x="18" y="19" width="3" height="2" />
+            <rect x="24" y="18" width="3" height="3" />
+            <rect x="10" y="24" width="2" height="3" />
+            <rect x="14" y="24" width="5" height="2" />
+          </svg>
+          <!-- Tiny green matcha leaf in the absolute center of QR code! -->
+          <div class="absolute w-7 h-7 bg-[#E2ECD5] border border-[#A6BF8F] rounded-full flex items-center justify-center shadow-md">
+            <span class="text-xs">🍃</span>
+          </div>
+        </div>
+        
+        <p class="text-xs text-gray-500 font-semibold mt-4">VOUCHER ID: #MATCHAMATCH-9923</p>
+        <p class="text-[9px] text-gray-400 mt-1">Valid until July 15th, 2026</p>
+      </div>
+    </main>
+
+    <!-- Footer Counter Claim Button -->
+    <footer class="w-full text-center z-10 pb-4 flex flex-col items-center">
+      <button class="px-6 py-3 bg-white hover:bg-white/90 border-2 border-[#638450] text-[#445E35] font-black rounded-full shadow-md active:scale-95 text-sm uppercase tracking-wider mb-3" onclick="closeVoucher()">
+        Back to Barista Counter
+      </button>
+      <p class="text-[10px] text-[#7A986E] font-semibold uppercase tracking-widest">
+        Show this screen to redeem your prize
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    // COLOR VARIABLES (Updated to match Bold Typography aesthetic perfectly)
+    const COLOR_MATCHA = '#76895C';      // Deep rich Matcha Green
+    const COLOR_MILK = '#F8F9F3';        // Clean Milky Off-white
+    const COLOR_STRAWBERRY = '#E8A2A5';  // Soft Pink Strawberry Cream
+    const COLOR_LAVENDER = '#C3B1E1';    // Soft Lavender purple
+    const COLOR_CHOCOLATE = '#8B5A2B';   // Sweet chocolate brown
+
+    // MULTI-LEVEL CONFIGURATIONS (Varying cups and colors for continuous leveling)
+    const LEVELS = [
+      {
+        name: "Warm Up Matcha",
+        recipe: "Matcha Silk Latte",
+        description: "Simple sorting with 2 primary layers.",
+        cups: [
+          [COLOR_MATCHA, COLOR_MILK, COLOR_MATCHA],
+          [COLOR_MILK, COLOR_STRAWBERRY, COLOR_MILK],
+          []
+        ]
+      },
+      {
+        name: "Double Whisk",
+        recipe: "Strawberry Foam Matcha",
+        description: "Add sweet strawberry froth to the mix.",
+        cups: [
+          [COLOR_MATCHA, COLOR_MILK, COLOR_STRAWBERRY],
+          [COLOR_STRAWBERRY, COLOR_MATCHA, COLOR_MILK],
+          [COLOR_MILK, COLOR_STRAWBERRY, COLOR_MATCHA],
+          []
+        ]
+      },
+      {
+        name: "Lavender Swirl",
+        recipe: "Earthy Violet Whisk",
+        description: "Beautiful lavender aroma layers appear!",
+        cups: [
+          [COLOR_MATCHA, COLOR_MILK, COLOR_LAVENDER],
+          [COLOR_LAVENDER, COLOR_STRAWBERRY, COLOR_MATCHA],
+          [COLOR_MILK, COLOR_LAVENDER, COLOR_STRAWBERRY],
+          [COLOR_STRAWBERRY, COLOR_MATCHA, COLOR_MILK],
+          []
+        ]
+      },
+      {
+        name: "Choco-Matcha Blast",
+        recipe: "Triple Choco-Matcha Cream",
+        description: "Chocolate cream fudge adds deep flavor complexity.",
+        cups: [
+          [COLOR_MATCHA, COLOR_MILK, COLOR_CHOCOLATE],
+          [COLOR_CHOCOLATE, COLOR_STRAWBERRY, COLOR_MATCHA],
+          [COLOR_MILK, COLOR_CHOCOLATE, COLOR_STRAWBERRY],
+          [COLOR_STRAWBERRY, COLOR_MATCHA, COLOR_MILK],
+          [COLOR_LAVENDER, COLOR_LAVENDER, COLOR_LAVENDER],
+          []
+        ]
+      },
+      {
+        name: "Zen Master Ceremony",
+        recipe: "Imperator Whisk Supreme",
+        description: "Ultimate blend. 5 rich cafe colors to sort perfectly.",
+        cups: [
+          [COLOR_MATCHA, COLOR_MILK, COLOR_CHOCOLATE],
+          [COLOR_CHOCOLATE, COLOR_STRAWBERRY, COLOR_MATCHA],
+          [COLOR_MILK, COLOR_CHOCOLATE, COLOR_STRAWBERRY],
+          [COLOR_STRAWBERRY, COLOR_MATCHA, COLOR_MILK],
+          [COLOR_LAVENDER, COLOR_MILK, COLOR_LAVENDER],
+          [COLOR_CHOCOLATE, COLOR_LAVENDER, COLOR_MATCHA],
+          [],
+          []
+        ]
+      }
+    ];
+
+    // PROFILE STATES LOADED FROM LOCAL STORAGE
+    let currentLevelIdx = parseInt(localStorage.getItem('matchamatch_level') || '0');
+    if (currentLevelIdx >= LEVELS.length) currentLevelIdx = 0;
+
+    let dailyScore = parseInt(localStorage.getItem('matchamatch_score') || '150');
+    let dailyStreak = parseInt(localStorage.getItem('matchamatch_streak') || '4');
+    let unlockedSkins = JSON.parse(localStorage.getItem('matchamatch_skins') || '["skin-zen"]');
+    let activeSkin = localStorage.getItem('matchamatch_active_skin') || 'skin-zen';
+
+    // SKINS REGISTRY DATABASE
+    const SKINS = [
+      { id: 'skin-zen', name: 'Zen Glass', emoji: '🍵', hint: 'Default modern glass' },
+      { id: 'skin-sakura', name: 'Sakura Chalice', emoji: '🌸', hint: 'Capture 1 daily Matcha cup to unlock' },
+      { id: 'skin-bamboo', name: 'Bamboo Vessel', emoji: '🎋', hint: 'Capture 2 daily Matcha cups to unlock' },
+      { id: 'skin-golden', name: 'Golden Rim', emoji: '⭐', hint: 'Unlock at 300 pts Daily Score' },
+      { id: 'skin-emerald', name: 'Emerald Mug', emoji: '🍃', hint: 'Unlock at 500 pts Daily Score' }
+    ];
+
+    let cups = [];
+    let selectedCupIndex = null;
+    let hasAddedCup = false;
+    let history = [];
+    let isPouring = false;
+    let videoStream = null;
+
+    // AUDIO ENGINE USING WEB AUDIO API
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    // JUICY SELECTION POP SOUND
+    function playSelectSound() {
+      try {
+        initAudio();
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(320, audioCtx.currentTime + 0.08);
+
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.08);
+      } catch (e) {}
+    }
+
+    // FLUID POURING GENTLE LIQUID SLIDE SOUND
+    function playPourSound() {
+      try {
+        initAudio();
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.4);
+
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.4);
+      } catch (e) {}
+    }
+
+    // BAMBOO WHISK BRUSHING / MIXING SOUND
+    function playWhiskSound() {
+      try {
+        initAudio();
+        let bufferSize = audioCtx.sampleRate * 1.0;
+        let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        let data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+
+        let noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+
+        let filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(600, audioCtx.currentTime);
+        for (let t = 0; t < 5; t++) {
+          let time = audioCtx.currentTime + t * 0.18;
+          filter.frequency.linearRampToValueAtTime(1200, time + 0.09);
+          filter.frequency.linearRampToValueAtTime(500, time + 0.18);
+        }
+
+        let gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.9);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        noise.start();
+        noise.stop(audioCtx.currentTime + 0.9);
+      } catch (e) {}
+    }
+
+    // MAJESTIC CHIME SOUND FOR COMPLETE
+    function playChimeSound() {
+      try {
+        initAudio();
+        const pentatonicNotes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
+        pentatonicNotes.forEach((freq, idx) => {
+          let osc = audioCtx.createOscillator();
+          let gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.08);
+          
+          gain.gain.setValueAtTime(0, audioCtx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + idx * 0.08 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.08 + 0.6);
+
+          osc.start(audioCtx.currentTime + idx * 0.08);
+          osc.stop(audioCtx.currentTime + idx * 0.08 + 0.6);
+        });
+      } catch (e) {}
+    }
+
+    // GAME LEVEL MANAGEMENT
+    function setupGame() {
+      const activeLevel = LEVELS[currentLevelIdx];
+      cups = activeLevel.cups.map(arr => [...arr]);
+      selectedCupIndex = null;
+      hasAddedCup = false;
+      history = [];
+      isPouring = false;
+      
+      // Update Level selectors UI
+      document.getElementById('currentLevelNumber').textContent = (currentLevelIdx + 1).toString();
+      document.getElementById('currentLevelName').textContent = activeLevel.name;
+      document.getElementById('headerLevelLabel').textContent = `Cafe Level 0${currentLevelIdx + 1}`;
+      document.getElementById('activeRecipeFooter').textContent = activeLevel.recipe;
+
+      // Reset Power-Up button state
+      const powerUpBtn = document.getElementById('btnPowerUp');
+      powerUpBtn.disabled = false;
+      powerUpBtn.innerHTML = `+ Clean Glass`;
+      powerUpBtn.className = "px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/20 text-xs font-bold transition active:scale-95";
+
+      renderCups();
+      updateButtons();
+      document.getElementById('helperMessage').textContent = "Tap a cup to select, then tap another to pour.";
+    }
+
+    function prevLevel() {
+      if (currentLevelIdx > 0) {
+        playSelectSound();
+        currentLevelIdx--;
+        localStorage.setItem('matchamatch_level', currentLevelIdx.toString());
+        setupGame();
+      }
+    }
+
+    function nextLevel() {
+      if (currentLevelIdx < LEVELS.length - 1) {
+        playSelectSound();
+        currentLevelIdx++;
+        localStorage.setItem('matchamatch_level', currentLevelIdx.toString());
+        setupGame();
+      }
+    }
+
+    function restartLevel() {
+      playSelectSound();
+      setupGame();
+    }
+
+    function showTipMessage() {
+      playSelectSound();
+      document.getElementById('helperMessage').textContent = "💡 Sort identical layers together to complete the orders!";
+    }
+
+    // UNDO MECHANICS
+    function pushToHistory() {
+      history.push(cups.map(arr => [...arr]));
+      updateButtons();
+    }
+
+    function undoMove() {
+      if (history.length > 0 && !isPouring) {
+        playSelectSound();
+        cups = history.pop();
+        selectedCupIndex = null;
+        renderCups();
+        updateButtons();
+        document.getElementById('helperMessage').textContent = "Undo applied! Keep sorting.";
+      }
+    }
+
+    function updateButtons() {
+      document.getElementById('btnUndo').disabled = (history.length === 0);
+    }
+
+    // POWER-UP: ADD AN EXTRA CUP
+    function usePowerUp() {
+      if (hasAddedCup || isPouring) return;
+      playSelectSound();
+      
+      pushToHistory();
+      cups.push([]); // Add empty cup
+      hasAddedCup = true;
+
+      const powerUpBtn = document.getElementById('btnPowerUp');
+      powerUpBtn.disabled = true;
+      powerUpBtn.innerHTML = `✔️ Clean Glass Added`;
+      powerUpBtn.className = "px-3 py-2 bg-white/5 text-white/40 rounded-full border border-white/5 text-xs font-bold transition opacity-40 cursor-not-allowed";
+
+      renderCups();
+      document.getElementById('helperMessage').textContent = "Empty glass added! You now have more options.";
+    }
+
+    // RENDER THE GLASSES INTERACTIVE DOM
+    function renderCups() {
+      const container = document.getElementById('cupsContainer');
+      container.innerHTML = '';
+
+      cups.forEach((cup, idx) => {
+        // Create Cup Box using the beautiful flex reverse alignment for perfect layer layouts
+        const cupDiv = document.createElement('div');
+        // Apply dynamic equipped glass skin modifier classes
+        cupDiv.className = `glass-cup flex flex-col-reverse justify-start overflow-hidden relative ${activeSkin}`;
+        if (cup.length === 0) {
+          cupDiv.classList.add('cup-empty');
+        }
+        
+        cupDiv.dataset.index = idx;
+        if (selectedCupIndex === idx) {
+          cupDiv.classList.add('selected-cup');
+        }
+
+        // Add Highlight structures
+        const highlight = document.createElement('div');
+        highlight.className = 'glass-highlight';
+        cupDiv.appendChild(highlight);
+
+        const rimRef = document.createElement('div');
+        rimRef.className = 'glass-rim-reflection';
+        cupDiv.appendChild(rimRef);
+
+        // Add Liquid Blocks sequentially (flex-col-reverse makes first added sit on the bottom)
+        cup.forEach((color) => {
+          const block = document.createElement('div');
+          block.className = 'liquid-block';
+          block.style.backgroundColor = color;
+          cupDiv.appendChild(block);
+        });
+
+        // Add Whisk success overlay template
+        const whisk = document.createElement('div');
+        whisk.className = 'whisk-overlay';
+        whisk.id = `whisk-${idx}`;
+        whisk.innerHTML = `
+          <svg class="w-full h-full text-[#B5926B]" viewBox="0 0 44 60" fill="currentColor">
+            <rect x="18" y="0" width="8" height="24" rx="4" />
+            <ellipse cx="22" cy="24" rx="10" ry="4" />
+            <path d="M12,28 C8,40 8,56 22,56 C36,56 36,40 32,28 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+            <path d="M17,28 C15,38 15,50 22,50 C29,50 29,38 27,28" fill="none" stroke="currentColor" stroke-width="2" />
+            <line x1="22" y1="28" x2="22" y2="48" stroke="currentColor" stroke-width="2" />
+          </svg>
+        `;
+        cupDiv.appendChild(whisk);
+
+        // Bind click handler
+        cupDiv.addEventListener('click', () => handleCupClick(idx));
+        container.appendChild(cupDiv);
+      });
+    }
+
+    // CLICK INPUT HANDLER
+    function handleCupClick(index) {
+      if (isPouring) return;
+
+      if (selectedCupIndex === null) {
+        if (cups[index].length > 0) {
+          selectedCupIndex = index;
+          playSelectSound();
+          renderCups();
+          document.getElementById('helperMessage').textContent = `Glass selected. Tap another glass to pour.`;
+        } else {
+          document.getElementById('helperMessage').textContent = `That glass is empty. Choose another glass!`;
+        }
+      } 
+      else {
+        if (selectedCupIndex === index) {
+          selectedCupIndex = null;
+          playSelectSound();
+          renderCups();
+          document.getElementById('helperMessage').textContent = `Deselected glass. Select a cup to start.`;
+        } 
+        else {
+          attemptPour(selectedCupIndex, index);
+        }
+      }
+    }
+
+    // POUR LOGIC AND TRANSITIONS
+    function attemptPour(srcIndex, destIndex) {
+      const srcCup = cups[srcIndex];
+      const destCup = cups[destIndex];
+
+      if (destCup.length >= 3) {
+        document.getElementById('helperMessage').textContent = `Oops! That glass is full.`;
+        selectedCupIndex = null;
+        renderCups();
+        return;
+      }
+
+      const topColor = srcCup[srcCup.length - 1];
+      const destTopColor = destCup.length > 0 ? destCup[destCup.length - 1] : null;
+
+      if (destTopColor === null || destTopColor === topColor) {
+        isPouring = true;
+        pushToHistory();
+
+        let layersToPour = 0;
+        for (let i = srcCup.length - 1; i >= 0; i--) {
+          if (srcCup[i] === topColor && destCup.length + layersToPour < 3) {
+            layersToPour++;
+          } else {
+            break;
+          }
+        }
+
+        playPourSound();
+        drawPouringStream(srcIndex, destIndex, topColor);
+
+        setTimeout(() => {
+          for (let k = 0; k < layersToPour; k++) {
+            srcCup.pop();
+            destCup.push(topColor);
+          }
+
+          createSplash(destIndex, topColor);
+
+          selectedCupIndex = null;
+          isPouring = false;
+          renderCups();
+
+          if (destCup.length === 3 && destCup.every(color => color === topColor)) {
+            triggerWhiskSuccess(destIndex);
+          } else {
+            document.getElementById('helperMessage').textContent = `Satisfying pour! Keep it up.`;
+          }
+
+          if (checkWin()) {
+            setTimeout(() => {
+              showWinModal();
+            }, 1000);
+          }
+
+        }, 550);
+      } else {
+        document.getElementById('helperMessage').textContent = `Mismatched ingredients! Pour onto matching colors only.`;
+        selectedCupIndex = null;
+        renderCups();
+      }
+    }
+
+    // DRAW DYNAMIC CSS POUR STREAM OVERLAY
+    function drawPouringStream(srcIdx, destIdx, color) {
+      const srcCup = document.querySelectorAll('.glass-cup')[srcIdx];
+      const destCup = document.querySelectorAll('.glass-cup')[destIdx];
+      const field = document.getElementById('cupsContainer');
+
+      const srcRect = srcCup.getBoundingClientRect();
+      const destRect = destCup.getBoundingClientRect();
+      const fieldRect = field.getBoundingClientRect();
+
+      const x1 = srcRect.left + srcRect.width / 2 - fieldRect.left;
+      const y1 = srcRect.top - fieldRect.top + 8;
+      const x2 = destRect.left + destRect.width / 2 - fieldRect.left;
+      const y2 = destRect.top - fieldRect.top + 8;
+
+      const stream = document.createElement('div');
+      stream.className = 'stream-line';
+      stream.style.backgroundColor = color;
+      stream.style.left = `${x1}px`;
+      stream.style.top = `${y1}px`;
+
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+      stream.style.width = '8px';
+      stream.style.transform = `rotate(${angle - 90}deg)`;
+      stream.style.height = `${distance}px`;
+
+      field.appendChild(stream);
+
+      setTimeout(() => {
+        stream.remove();
+      }, 550);
+    }
+
+    // ASMR SPLASH PARTICLES POPPING
+    function createSplash(cupIdx, color) {
+      const cup = document.querySelectorAll('.glass-cup')[cupIdx];
+      const numParticles = 14;
+
+      for (let i = 0; i < numParticles; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.backgroundColor = color;
+        p.style.width = `${Math.random() * 5 + 4}px`;
+        p.style.height = p.style.width;
+        
+        const dx = (Math.random() * 2 - 1) * 75;
+        const dy = (Math.random() * -60) - 20;
+
+        p.style.setProperty('--dx', `${dx}px`);
+        p.style.setProperty('--dy', `${dy}px`);
+        p.style.left = '50%';
+        p.style.top = '10px';
+
+        cup.appendChild(p);
+
+        setTimeout(() => p.remove(), 700);
+      }
+    }
+
+    // BAMBOO WHISK SPINNING EFFECT
+    function triggerWhiskSuccess(cupIdx) {
+      playWhiskSound();
+      const whisk = document.getElementById(`whisk-${cupIdx}`);
+      if (whisk) {
+        whisk.classList.add('whisk-spinning');
+        document.getElementById('helperMessage').textContent = `✨ Perfect match! Whirl of fresh froth.`;
+        setTimeout(() => {
+          whisk.classList.remove('whisk-spinning');
+        }, 1250);
+      }
+    }
+
+    // SORT CHECK WIN CRITERIA
+    function checkWin() {
+      for (let cup of cups) {
+        if (cup.length > 0) {
+          const firstColor = cup[0];
+          for (let color of cup) {
+            if (color !== firstColor) return false;
+          }
+        }
+      }
+
+      let colorToCupMap = {};
+      for (let idx = 0; idx < cups.length; idx++) {
+        const cup = cups[idx];
+        if (cup.length > 0) {
+          const color = cup[0];
+          if (colorToCupMap[color] !== undefined) {
+            return false;
+          }
+          colorToCupMap[color] = idx;
+        }
+      }
+
+      return true;
+    }
+
+    // OVERLAY INTERACTION
+    function showWinModal() {
+      playChimeSound();
+      const modal = document.getElementById('winModal');
+      const card = document.getElementById('winCard');
+      modal.classList.remove('pointer-events-none');
+      modal.classList.add('opacity-100');
+      card.classList.remove('scale-90');
+      card.classList.add('scale-100');
+    }
+
+    function claimUpgrade() {
+      playSelectSound();
+      const winModal = document.getElementById('winModal');
+      winModal.classList.add('pointer-events-none');
+      winModal.classList.remove('opacity-100');
+
+      const rScreen = document.getElementById('rewardScreen');
+      rScreen.classList.remove('pointer-events-none');
+      rScreen.classList.add('opacity-100');
+    }
+
+    function closeVoucher() {
+      playSelectSound();
+      const rScreen = document.getElementById('rewardScreen');
+      rScreen.classList.add('pointer-events-none');
+      rScreen.classList.remove('opacity-100');
+
+      // Add points for completing the level
+      dailyScore += 50;
+      localStorage.setItem('matchamatch_score', dailyScore.toString());
+
+      // Advance to next level automatically if possible
+      if (currentLevelIdx < LEVELS.length - 1) {
+        currentLevelIdx++;
+        localStorage.setItem('matchamatch_level', currentLevelIdx.toString());
+      }
+      setupGame();
+    }
+
+    // SPRAWL FLOATING LEAVES BACKGROUND
+    function generateBackgroundLeaves() {
+      const container = document.getElementById('leafContainer');
+      const count = 12;
+      for (let i = 0; i < count; i++) {
+        const leaf = document.createElement('div');
+        leaf.className = 'leaf';
+        leaf.style.left = `${Math.random() * 100}%`;
+        leaf.style.animationDelay = `${Math.random() * 8}s`;
+        leaf.style.animationDuration = `${Math.random() * 6 + 7}s`;
+        container.appendChild(leaf);
+      }
+    }
+
+    // MATCHA GO NAVIGATION AND VIDEO STREAMS
+    function switchTab(tab) {
+      playSelectSound();
+      const tabSort = document.getElementById('tabSort');
+      const tabGo = document.getElementById('tabGo');
+      const sortView = document.getElementById('sortGameView');
+      const goView = document.getElementById('matchaGoView');
+
+      if (tab === 'sort') {
+        tabSort.className = "flex-1 py-2.5 rounded-xl transition duration-200 text-[#3A432E] bg-white shadow-sm";
+        tabGo.className = "flex-1 py-2.5 rounded-xl transition duration-200 text-[#5D6B4A]";
+        sortView.classList.remove('hidden');
+        goView.classList.add('hidden');
+        stopCamera();
+        setupGame(); // Refresh the board layout
+      } else {
+        tabSort.className = "flex-1 py-2.5 rounded-xl transition duration-200 text-[#5D6B4A]";
+        tabGo.className = "flex-1 py-2.5 rounded-xl transition duration-200 text-[#3A432E] bg-white shadow-sm";
+        sortView.classList.add('hidden');
+        goView.classList.remove('hidden');
+        updateStatsUI();
+        renderSkinsGallery();
+        startCamera();
+      }
+    }
+
+    async function startCamera() {
+      const video = document.getElementById('scanVideo');
+      const fallback = document.getElementById('scannerFallback');
+      const statusText = document.getElementById('scanStatusText');
+      const statusDot = document.getElementById('scanStatusDot');
+      const canvas = document.getElementById('scanCanvas');
+
+      // Reset to scanning feed screen
+      canvas.classList.add('hidden');
+      
+      try {
+        if (videoStream) stopCamera();
+
+        videoStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' }
+        });
+        video.srcObject = videoStream;
+        video.classList.remove('hidden');
+        fallback.classList.add('hidden');
+        
+        statusText.textContent = "Scanner Active";
+        statusDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+      } catch (err) {
+        console.log("Camera acquisition failed, using image upload fallback:", err);
+        video.classList.add('hidden');
+        fallback.classList.remove('hidden');
+        statusText.textContent = "Upload fallback ready";
+        statusDot.className = "w-2 h-2 rounded-full bg-orange-400";
+      }
+    }
+
+    function stopCamera() {
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+      }
+      const video = document.getElementById('scanVideo');
+      if (video) video.classList.add('hidden');
+    }
+
+    function updateStatsUI() {
+      // Auto unlock base on high scores
+      if (dailyScore >= 300 && !unlockedSkins.includes('skin-golden')) {
+        unlockedSkins.push('skin-golden');
+        localStorage.setItem('matchamatch_skins', JSON.stringify(unlockedSkins));
+      }
+      if (dailyScore >= 500 && !unlockedSkins.includes('skin-emerald')) {
+        unlockedSkins.push('skin-emerald');
+        localStorage.setItem('matchamatch_skins', JSON.stringify(unlockedSkins));
+      }
+
+      document.getElementById('statsScore').textContent = dailyScore.toString();
+      document.getElementById('statsStreak').textContent = dailyStreak.toString();
+      document.getElementById('statsUnlocked').textContent = unlockedSkins.length.toString();
+    }
+
+    // CHROME PHOTO UPLOAD INTERACTION FALLBACKS
+    function handlePhotoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      playSelectSound();
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          runScanningSequence(img);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function triggerScanning() {
+      const video = document.getElementById('scanVideo');
+      const canvas = document.getElementById('scanCanvas');
+      
+      // If we have video stream, grab frame
+      if (videoStream && !video.paused) {
+        playSelectSound();
+        canvas.width = video.videoWidth || 400;
+        canvas.height = video.videoHeight || 300;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        const img = new Image();
+        img.src = canvas.toDataURL();
+        img.onload = function() {
+          runScanningSequence(img);
+        };
+      } else {
+        // Mock capture for standard emulator fallbacks to keep it robust and responsive
+        playSelectSound();
+        const img = new Image();
+        img.onload = function() {
+          runScanningSequence(img);
+        };
+        // Use a cute green tea cup pattern SVG inside canvas
+        img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect width="100%" height="100%" fill="%23E2ECD5"/><circle cx="200" cy="150" r="60" fill="%2376895C"/><text x="200" y="155" font-family="sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">🍵</text></svg>';
+      }
+    }
+
+    // ANALYZE IMAGE PIXELS FOR GREEN SPECTRUM TO DETECT THE CUP
+    function analyzeMatchaCup(imgElement) {
+      const canvas = document.getElementById('scanCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 400;
+      canvas.height = 300;
+      
+      // Draw image onto canvas
+      ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+      
+      // Look for green/matcha pixels
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const pixels = imgData.data;
+      let sumX = 0, sumY = 0, countGreen = 0;
+
+      for (let i = 0; i < pixels.length; i += 4) {
+        const r = pixels[i];
+        const g = pixels[i+1];
+        const b = pixels[i+2];
+
+        // Matcha Green detection: green is higher than red and blue, green is moderately rich
+        if (g > 65 && g > r * 1.15 && g > b * 1.15 && r < 190 && b < 190) {
+          countGreen++;
+          const x = (i / 4) % canvas.width;
+          const y = Math.floor((i / 4) / canvas.width);
+          sumX += x;
+          sumY += y;
+        }
+      }
+
+      // Draw high-tech target tracking rings if green is segmented
+      if (countGreen > 300) {
+        const centerX = sumX / countGreen;
+        const centerY = sumY / countGreen;
+
+        ctx.strokeStyle = '#76895C';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 55, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#EAF2DE';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 65, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        // Draw HUD crosshairs
+        ctx.strokeStyle = '#76895C';
+        ctx.beginPath();
+        ctx.moveTo(centerX - 80, centerY); ctx.lineTo(centerX + 80, centerY);
+        ctx.moveTo(centerX, centerY - 80); ctx.lineTo(centerX, centerY + 80);
+        ctx.stroke();
+
+        ctx.fillStyle = '#76895C';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.fillText("TARGET: MATCHA CUP DETECTED", centerX - 65, centerY - 72);
+        return true;
+      } else {
+        // Draw standard scanning search markers
+        ctx.strokeStyle = '#D4AF37';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(80, 50, 240, 200);
+        
+        ctx.fillStyle = '#D4AF37';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.fillText("VESSEL CONFIRMED (RESTORING MATCHA ENERGY)", 95, 40);
+        return false;
+      }
+    }
+
+    // TRIGGER SCANNING SEQUENCE
+    function runScanningSequence(imgElement) {
+      const laser = document.getElementById('scannerLaser');
+      const canvas = document.getElementById('scanCanvas');
+      const video = document.getElementById('scanVideo');
+      const statusText = document.getElementById('scanStatusText');
+      const statusDot = document.getElementById('scanStatusDot');
+
+      // Stop camera video to freeze viewfinder
+      video.classList.add('hidden');
+      canvas.classList.remove('hidden');
+      laser.classList.remove('hidden');
+      
+      statusText.textContent = "Extracting contours...";
+      statusDot.className = "w-2 h-2 rounded-full bg-lime-500 animate-ping";
+
+      // Play continuous whisk scanning sound
+      playWhiskSound();
+
+      let isMatcha = analyzeMatchaCup(imgElement);
+
+      setTimeout(() => {
+        laser.classList.add('hidden');
+        statusText.textContent = isMatcha ? "Matcha Cup Restored!" : "Standard Cup Restored!";
+        statusDot.className = "w-2 h-2 rounded-full bg-emerald-500";
+        playChimeSound();
+
+        // Save capture and scores
+        dailyScore += 100;
+        
+        // Track capture index for unlocking skins
+        let captureCount = parseInt(localStorage.getItem('matchamatch_captures') || '0');
+        captureCount++;
+        localStorage.setItem('matchamatch_captures', captureCount.toString());
+
+        let newlyUnlocked = [];
+        if (captureCount === 1 && !unlockedSkins.includes('skin-sakura')) {
+          unlockedSkins.push('skin-sakura');
+          newlyUnlocked.push('Sakura Chalice 🌸');
+        }
+        if (captureCount >= 2 && !unlockedSkins.includes('skin-bamboo')) {
+          unlockedSkins.push('skin-bamboo');
+          newlyUnlocked.push('Bamboo Vessel 🎋');
+        }
+        
+        // Auto unlock base on high scores
+        if (dailyScore >= 300 && !unlockedSkins.includes('skin-golden')) {
+          unlockedSkins.push('skin-golden');
+          newlyUnlocked.push('Golden Rim ⭐');
+        }
+        if (dailyScore >= 500 && !unlockedSkins.includes('skin-emerald')) {
+          unlockedSkins.push('skin-emerald');
+          newlyUnlocked.push('Emerald Mug 🍃');
+        }
+
+        // Save
+        localStorage.setItem('matchamatch_score', dailyScore.toString());
+        localStorage.setItem('matchamatch_skins', JSON.stringify(unlockedSkins));
+
+        updateStatsUI();
+        renderSkinsGallery();
+
+        // Flash screen white effect
+        const flash = document.createElement('div');
+        flash.className = 'fixed inset-0 bg-white z-50 pointer-events-none opacity-100 transition-opacity duration-300';
+        document.body.appendChild(flash);
+        setTimeout(() => {
+          flash.style.opacity = '0';
+          setTimeout(() => flash.remove(), 300);
+        }, 100);
+
+        // Customize the helper alert message
+        let alertMsg = isMatcha ? "Real green Matcha segmented! Restored +100 Pts. " : "Daily cup segment restored! +100 Pts. ";
+        if (newlyUnlocked.length > 0) {
+          alertMsg += "Unlocked " + newlyUnlocked.join(' & ') + " skin!";
+        }
+        
+        document.getElementById('helperMessage').textContent = alertMsg;
+
+        // Automatically show a reward dialog or switch to Sort game tab after 2.5 seconds
+        setTimeout(() => {
+          switchTab('sort');
+        }, 2500);
+
+      }, 2000);
+    }
+
+    function renderSkinsGallery() {
+      const container = document.getElementById('skinsContainer');
+      container.innerHTML = '';
+
+      SKINS.forEach(skin => {
+        const isUnlocked = unlockedSkins.includes(skin.id);
+        const isEquipped = activeSkin === skin.id;
+
+        const skinDiv = document.createElement('div');
+        skinDiv.className = `flex-shrink-0 w-24 p-2.5 rounded-2xl border text-center transition cursor-pointer select-none relative ${
+          isEquipped ? 'border-[#3A432E] bg-[#E2ECD5] font-extrabold shadow-sm' : isUnlocked ? 'border-[#3A432E]/10 bg-white hover:bg-slate-50' : 'border-dashed border-[#3A432E]/10 bg-[#3A432E]/5 opacity-50'
+        }`;
+
+        skinDiv.innerHTML = `
+          <div class="text-2xl mb-1">${isUnlocked ? skin.emoji : '🔒'}</div>
+          <div class="text-[9px] uppercase tracking-wide leading-none truncate">${skin.name}</div>
+          ${isEquipped ? '<span class="absolute top-1 right-1 text-[7px] bg-[#3A432E] text-white px-1 py-0.5 rounded-md font-bold uppercase">EQ</span>' : ''}
+        `;
+
+        if (isUnlocked) {
+          skinDiv.onclick = () => {
+            playSelectSound();
+            activeSkin = skin.id;
+            localStorage.setItem('matchamatch_active_skin', activeSkin);
+            renderSkinsGallery();
+            setupGame();
+          };
+        } else {
+          skinDiv.title = skin.hint;
+        }
+
+        container.appendChild(skinDiv);
+      });
+    }
+
+    // INITIAL LAUNCH INIT
+    window.addEventListener('DOMContentLoaded', () => {
+      generateBackgroundLeaves();
+      setupGame();
+      document.body.addEventListener('touchstart', initAudio, { once: true });
+      document.body.addEventListener('click', initAudio, { once: true });
+    });
+  </script>
+</body>
+</html>
