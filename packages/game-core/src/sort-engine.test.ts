@@ -97,9 +97,7 @@ describe("sort-engine", () => {
     const state = createSortState([[COLORS.matcha], [COLORS.milk], []], 8);
 
     expect(canPour(state.cups, 0, 1)).toBe(false);
-    expect(attemptPour(state, 0, 1).message).toBe(
-      "Mismatched ingredients! Pour onto matching colors only.",
-    );
+    expect(attemptPour(state, 0, 1).message).toBe("Wrong color. Match colors only.");
   });
 
   it("blocks pours into full destination cups", () => {

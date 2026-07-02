@@ -4,8 +4,7 @@ const CUP_CAPACITY = 3;
 export const DEFAULT_RESTART_LIMIT = 1;
 export const DEFAULT_UNDO_LIMIT = 5;
 export const INITIAL_SORT_MESSAGE = "Tap a cup to select, then tap another to pour.";
-const MISMATCH_MESSAGE =
-  "Mismatched ingredients! Pour onto matching colors only.";
+const MISMATCH_MESSAGE = "Wrong color. Match colors only.";
 const FULL_CUP_MESSAGE = "Oops! That glass is full.";
 const MOVE_LIMIT_MESSAGE = "Move limit reached! Level failed.";
 const SUCCESS_MESSAGE = "Satisfying pour! Keep it up.";

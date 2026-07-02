@@ -182,7 +182,7 @@ export function SortBoard({
         <div className="mt-5 grid grid-cols-2 gap-3">
           <button
             aria-label="Undo"
-            className="mm-button rounded-[18px] bg-[#c6cabd] px-4 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(145,150,128,0.16)] disabled:cursor-not-allowed disabled:opacity-45"
+            className="mm-button rounded-[18px] bg-[#7b8d5d] px-4 py-3 text-sm font-semibold text-[#fffdf6] shadow-[0_16px_30px_rgba(123,141,93,0.22)] disabled:cursor-not-allowed disabled:opacity-45"
             disabled={
               areBoardActionsLocked ||
               sortState.history.length === 0 ||
