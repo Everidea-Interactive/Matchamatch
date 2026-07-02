@@ -140,6 +140,25 @@ test("tab switch clears pending sort selection state", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("tab switch keeps shell height stable", async ({ page }) => {
+  await page.goto("/");
+  await page.waitForTimeout(500);
+
+  const shell = page.locator(".mm-shell-in");
+  const sortHeight = await shell.evaluate((element) => {
+    return element.getBoundingClientRect().height;
+  });
+
+  await page.getByRole("button", { name: "Go" }).click();
+  await expect(page.getByText("Camera Ready")).toBeVisible();
+
+  const goHeight = await shell.evaluate((element) => {
+    return element.getBoundingClientRect().height;
+  });
+
+  expect(Math.abs(goHeight - sortHeight)).toBeLessThan(1);
+});
+
 test("winning level 1 loads fresh level 2 board without spawned cup", async ({
   page,
 }) => {
