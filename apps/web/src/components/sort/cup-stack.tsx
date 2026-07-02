@@ -6,9 +6,9 @@ export function CupStack({
   index,
   isCandidateTarget,
   isDeselecting,
+  isDisabled,
   isEmptyTap,
   isInvalidTarget,
-  isPowerUpTarget,
   isPourDestination,
   isPourSource,
   isSelected,
@@ -20,9 +20,9 @@ export function CupStack({
   index: number;
   isCandidateTarget: boolean;
   isDeselecting: boolean;
+  isDisabled: boolean;
   isEmptyTap: boolean;
   isInvalidTarget: boolean;
-  isPowerUpTarget: boolean;
   isPourDestination: boolean;
   isPourSource: boolean;
   isSelected: boolean;
@@ -36,7 +36,7 @@ export function CupStack({
     shouldShake ? "mm-cup-shake" : "",
     shouldPulse ? "mm-cup-select-pop" : "",
     isPourSource ? "mm-cup-pour-source" : "",
-    isPourDestination || isPowerUpTarget ? "mm-cup-pour-destination" : "",
+    isPourDestination ? "mm-cup-pour-destination" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -51,6 +51,7 @@ export function CupStack({
           : `mm-cup ${animationClassName} flex h-40 flex-col-reverse overflow-hidden rounded-[28px] border-2 border-[#3A432E]/15 bg-white/55 shadow-[0_16px_32px_rgba(58,67,46,0.10)] hover:-translate-y-0.5 hover:shadow-[0_20px_40px_rgba(58,67,46,0.14)]`
       }
       data-testid={`cup-${index}`}
+      disabled={isDisabled}
       onClick={onPress}
       type="button"
     >
@@ -65,7 +66,7 @@ export function CupStack({
           className="mm-cup-wave mm-cup-wave-source"
         />
       ) : null}
-      {isPourDestination || isPowerUpTarget ? (
+      {isPourDestination ? (
         <span
           key={`destination-wave-${feedbackId}`}
           aria-hidden="true"

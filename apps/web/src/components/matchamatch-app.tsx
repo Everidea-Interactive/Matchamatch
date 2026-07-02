@@ -13,6 +13,7 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
     activeLevel,
     activeTab,
     applyScannerResult,
+    currentBoardLevelIndex,
     onCupPress,
     profile,
     recentUnlockedSkinIds,
@@ -23,8 +24,8 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
     scorePulseKey,
     sortState,
     sortFeedbackEvent,
+    tryAgain,
     undoMove,
-    useExtraCup,
   } = useMatchamatchApp();
 
   useEffect(() => {
@@ -50,10 +51,10 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
 
     postToHost({
       type: "matchamatch:progress",
-      levelIndex: profile.currentLevelIndex,
+      levelIndex: currentBoardLevelIndex,
       dailyScore: profile.dailyScore,
     });
-  }, [mode, profile]);
+  }, [currentBoardLevelIndex, mode, profile]);
 
   if (!activeLevel || !profile || !sortState) {
     return (
@@ -77,10 +78,11 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
           {activeTab === "sort" ? (
             <SortBoard
               activeLevel={activeLevel}
+              activeLevelIndex={currentBoardLevelIndex}
               onCupPress={onCupPress}
               onRestart={restartLevel}
+              onTryAgain={tryAgain}
               onUndo={undoMove}
-              onUsePowerUp={useExtraCup}
               profile={profile}
               scorePulseKey={scorePulseKey}
               sortState={sortState}
