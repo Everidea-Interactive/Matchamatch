@@ -68,11 +68,11 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
     <main
       className={
         mode === "embed"
-          ? "mx-auto w-full max-w-md p-4"
-          : "mx-auto min-h-screen w-full max-w-md px-4 py-6"
+          ? "mx-auto w-full max-w-md p-3 sm:p-4"
+          : "mx-auto min-h-screen w-full max-w-md px-3 py-5 sm:px-4 sm:py-6"
       }
     >
-      <div className="mm-shell-in rounded-[32px] border border-white/50 bg-white/45 p-4 shadow-[0_24px_80px_rgba(58,67,46,0.14)] backdrop-blur-sm">
+      <div className="mm-shell-in rounded-[36px] border border-white/60 bg-[linear-gradient(180deg,rgba(250,251,243,0.78),rgba(235,243,225,0.72))] p-3 shadow-[0_28px_80px_rgba(158,166,132,0.18)] backdrop-blur-sm sm:p-4">
         <TopNav activeTab={activeTab} onTabChange={setActiveTab} />
         <div key={activeTab} className="mm-panel-in">
           {activeTab === "sort" ? (

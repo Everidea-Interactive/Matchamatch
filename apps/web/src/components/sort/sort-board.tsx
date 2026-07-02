@@ -7,6 +7,9 @@ import { canPour } from "@matchamatch/game-core";
 import { useMemo } from "react";
 import type { SortFeedbackEvent } from "@/hooks/use-matchamatch-app";
 import { CupStack } from "./cup-stack";
+import { RetryLeafIcon } from "./retry-leaf-icon";
+
+const MAX_RETRY_LEAVES = 3;
 
 export function SortBoard({
   activeLevel,
@@ -50,91 +53,64 @@ export function SortBoard({
   const isSuccessMessage = sortFeedbackEvent.kind === "success";
   const isFailedMessage = sortState.status === "failed";
   const areBoardActionsLocked = sortState.status !== "active";
+  const retryLeaves = Array.from({ length: MAX_RETRY_LEAVES }, (_, index) => {
+    return index < profile.retryBudgetRemaining;
+  });
 
   return (
-    <section className="mm-card-sheen rounded-[28px] bg-[linear-gradient(180deg,rgba(250,252,246,0.96),rgba(238,245,230,0.88))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
-      <header className="mb-5">
+    <section className="mm-card-sheen rounded-[34px] bg-[linear-gradient(180deg,rgba(252,252,248,0.98),rgba(242,247,235,0.92))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.88)] sm:p-6">
+      <header className="mb-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#7A986E]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[#9A9A80]">
               Cafe Level {activeLevelIndex + 1}
             </p>
-            <h1 className="mt-2 text-3xl font-bold tracking-[-0.04em] text-[#2E3625]">
+            <h1 className="mt-3 max-w-[9ch] text-[2.15rem] leading-[0.98] font-bold tracking-[-0.05em] text-[#343328] sm:text-[2.35rem]">
               {activeLevel.name}
             </h1>
-            <p className="mt-2 text-sm font-medium text-[#5D6B4A]">
-              {activeLevel.recipe}
+          </div>
+          <div className="flex flex-col items-end gap-3">
+            <div className="rounded-[24px] bg-white/88 px-5 py-4 text-center shadow-[0_16px_30px_rgba(144,149,120,0.14)] transition-transform duration-300 ease-[var(--mm-ease-spring)] hover:-translate-y-0.5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#A0A184]">
+                Daily Score
+              </p>
+              <p
+                key={`score-${scorePulseKey}`}
+                className={`mt-1 text-[2rem] leading-none font-bold text-[#343328] ${
+                  scorePulseKey > 0 ? "mm-score-pop" : ""
+                }`}
+              >
+                {profile.dailyScore}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="mt-4 flex items-center justify-between gap-3 text-[#66664F]">
+          <div data-testid="moves-counter">
+            <p className="text-[1.05rem] font-medium">
+              Moves{" "}
+              <span className="font-semibold text-[#2E3625]">
+                {sortState.movesUsed} / {sortState.moveLimit}
+              </span>
             </p>
           </div>
-          <div className="rounded-2xl bg-white/75 px-4 py-3 text-right shadow-sm transition-transform duration-300 ease-[var(--mm-ease-spring)] hover:-translate-y-0.5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8AA07D]">
-              Daily Score
-            </p>
-            <p
-              key={`score-${scorePulseKey}`}
-              className={`mt-1 text-2xl font-bold text-[#3A432E] ${
-                scorePulseKey > 0 ? "mm-score-pop" : ""
-              }`}
-            >
-              {profile.dailyScore}
-            </p>
+          <div
+            className="flex shrink-0 items-center gap-2"
+            data-testid="retry-counter"
+          >
+            <span className="sr-only">
+              Retries Left {profile.retryBudgetRemaining}
+            </span>
+            {retryLeaves.map((isActive, index) => (
+              <RetryLeafIcon key={`retry-leaf-${index}`} isActive={isActive} />
+            ))}
           </div>
         </div>
       </header>
 
-      <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <div
-          className="rounded-2xl bg-white/80 px-3 py-2 shadow-sm"
-          data-testid="moves-counter"
-        >
-          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#8AA07D]">
-            Moves
-          </p>
-          <p className="mt-1 text-sm font-bold text-[#2E3625]">
-            {sortState.movesUsed} / {sortState.moveLimit}
-          </p>
-        </div>
-        <div
-          className="rounded-2xl bg-white/80 px-3 py-2 shadow-sm"
-          data-testid="undo-counter"
-        >
-          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#8AA07D]">
-            Undo Left
-          </p>
-          <p className="mt-1 text-sm font-bold text-[#2E3625]">
-            {sortState.undoRemaining}
-          </p>
-        </div>
-        <div
-          className="rounded-2xl bg-white/80 px-3 py-2 shadow-sm"
-          data-testid="restart-counter"
-        >
-          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#8AA07D]">
-            Restart Left
-          </p>
-          <p className="mt-1 text-sm font-bold text-[#2E3625]">
-            {sortState.restartRemaining}
-          </p>
-        </div>
-        <div
-          className="rounded-2xl bg-white/80 px-3 py-2 shadow-sm"
-          data-testid="retry-counter"
-        >
-          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#8AA07D]">
-            Retries Left
-          </p>
-          <p className="mt-1 text-sm font-bold text-[#2E3625]">
-            {profile.retryBudgetRemaining}
-          </p>
-        </div>
-      </div>
-
       <div
-        className="grid gap-4"
+        className="grid grid-cols-3 gap-x-5 gap-y-4 sm:gap-x-6 sm:gap-y-5"
         data-testid="cups-grid"
-        style={{
-          gridTemplateColumns: "repeat(auto-fit, minmax(88px, 1fr))",
-        }}
       >
         {sortState.cups.map((cup, index) => (
           <CupStack
@@ -176,7 +152,7 @@ export function SortBoard({
 
       <p
         key={`message-${sortFeedbackEvent.id}`}
-        className={`mm-feedback-in mt-4 min-h-6 text-sm font-medium ${
+        className={`mm-feedback-in mt-5 min-h-6 text-sm font-medium ${
           isFailedMessage
             ? "text-[#7C3E27]"
             : isInvalidMessage
@@ -188,10 +164,20 @@ export function SortBoard({
       >
         {sortState.message}
       </p>
-      <div className="mt-5 flex flex-wrap gap-2">
+      <div className="sr-only">
+        <p data-testid="undo-counter">Undo Left {sortState.undoRemaining}</p>
+        <p data-testid="restart-counter">
+          Restart Left {sortState.restartRemaining}
+        </p>
+      </div>
+      <div
+        className={`mt-5 grid gap-3 ${
+          sortState.status === "failed" ? "grid-cols-2" : "grid-cols-2"
+        }`}
+      >
         <button
           aria-label="Undo"
-          className="mm-button rounded-xl bg-[#3A432E] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(58,67,46,0.18)] disabled:cursor-not-allowed disabled:opacity-30"
+          className="mm-button rounded-[18px] bg-[#c6cabd] px-4 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(145,150,128,0.16)] disabled:cursor-not-allowed disabled:opacity-45"
           disabled={
             areBoardActionsLocked ||
             sortState.history.length === 0 ||
@@ -200,21 +186,21 @@ export function SortBoard({
           onClick={onUndo}
           type="button"
         >
-          Undo
+          Undo ({sortState.undoRemaining})
         </button>
         <button
           aria-label="Restart"
-          className="mm-button rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[#3A432E] shadow-sm"
+          className="mm-button rounded-[18px] border border-[#e7e3d8] bg-white px-4 py-3 text-sm font-semibold text-[#3A432E] shadow-[0_12px_24px_rgba(180,184,162,0.12)] disabled:cursor-not-allowed disabled:opacity-45"
           disabled={areBoardActionsLocked || sortState.restartRemaining === 0}
           onClick={onRestart}
           type="button"
         >
-          Restart
+          Restart ({sortState.restartRemaining})
         </button>
         {sortState.status === "failed" ? (
           <button
             aria-label="Try Again"
-            className="mm-button rounded-xl bg-[#76895C] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(118,137,92,0.18)]"
+            className="mm-button col-span-2 rounded-[18px] bg-[#7b8d5d] px-4 py-3 text-sm font-semibold text-white shadow-[0_16px_30px_rgba(123,141,93,0.22)]"
             onClick={onTryAgain}
             type="button"
           >

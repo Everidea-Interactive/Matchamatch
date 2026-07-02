@@ -47,8 +47,8 @@ export function CupStack({
       aria-pressed={isSelected}
       className={
         isSelected
-          ? `mm-cup ${animationClassName} flex h-40 flex-col-reverse overflow-hidden rounded-[28px] border-2 border-[#3A432E] bg-white/75 shadow-[0_20px_40px_rgba(58,67,46,0.14)] ring-4 ring-[#C6D6B8]/80`
-          : `mm-cup ${animationClassName} flex h-40 flex-col-reverse overflow-hidden rounded-[28px] border-2 border-[#3A432E]/15 bg-white/55 shadow-[0_16px_32px_rgba(58,67,46,0.10)] hover:-translate-y-0.5 hover:shadow-[0_20px_40px_rgba(58,67,46,0.14)]`
+          ? `mm-cup ${animationClassName} flex h-44 flex-col-reverse overflow-hidden rounded-[30px] border border-[#d7d8ca] bg-white/88 shadow-[0_22px_36px_rgba(177,182,151,0.18)] ring-4 ring-[#d8e2bf]/85`
+          : `mm-cup ${animationClassName} flex h-44 flex-col-reverse overflow-hidden rounded-[30px] border border-[#dcdccc] bg-white/72 shadow-[0_18px_32px_rgba(177,182,151,0.13)] hover:-translate-y-0.5 hover:shadow-[0_22px_36px_rgba(177,182,151,0.18)]`
       }
       data-testid={`cup-${index}`}
       disabled={isDisabled}
@@ -74,7 +74,7 @@ export function CupStack({
         />
       ) : null}
       {cup.length === 0 ? (
-        <span className="flex h-full items-center justify-center text-xs font-semibold uppercase tracking-[0.3em] text-[#9AAC8D]">
+        <span className="flex h-full items-center justify-center text-xs font-semibold uppercase tracking-[0.32em] text-[#b0af98]">
           Empty
         </span>
       ) : null}
