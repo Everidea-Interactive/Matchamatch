@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Matchamatch Embed Host</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 0;
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        min-height: 100vh;
+      }
+
+      aside {
+        padding: 16px;
+        border-right: 1px solid #ddd;
+      }
+
+      iframe {
+        width: 100%;
+        height: 100vh;
+        border: 0;
+      }
+
+      pre {
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <aside>
+      <h1>Host Log</h1>
+      <pre data-testid="host-log"></pre>
+    </aside>
+    <iframe src="/embed" title="Matchamatch Embed"></iframe>
+    <script>
+      const log = document.querySelector('[data-testid="host-log"]');
+
+      window.addEventListener("message", (event) => {
+        log.textContent += `${event.data.type}\n`;
+      });
+    </script>
+  </body>
+</html>
