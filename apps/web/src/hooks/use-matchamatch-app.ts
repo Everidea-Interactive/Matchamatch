@@ -26,11 +26,15 @@ export function useMatchamatchApp() {
     "Point camera at Matcha or upload a drink photo.",
   );
 
+  function createLevelState(levelIndex: number) {
+    return createSortState((LEVELS[levelIndex] ?? LEVELS[0]).cups);
+  }
+
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const nextProfile = loadProfile(window.localStorage);
     setProfile(nextProfile);
-    setSortState(createSortState(LEVELS[nextProfile.currentLevelIndex].cups));
+    setSortState(createLevelState(nextProfile.currentLevelIndex));
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
 
@@ -47,11 +51,11 @@ export function useMatchamatchApp() {
     : null;
 
   function restartLevel() {
-    setSortState((current) =>
-      current && profile
-        ? createSortState(LEVELS[profile.currentLevelIndex].cups)
-        : current,
-    );
+    if (!profile) {
+      return;
+    }
+
+    setSortState(createLevelState(profile.currentLevelIndex));
   }
 
   function undoMove() {
@@ -59,49 +63,46 @@ export function useMatchamatchApp() {
   }
 
   function onCupPress(index: number) {
-    setSortState((current) => {
-      if (!current) {
-        return current;
+    if (!sortState) {
+      return;
+    }
+
+    if (sortState.selectedCupIndex === null) {
+      if (sortState.cups[index]?.length) {
+        setSortState({
+          ...sortState,
+          selectedCupIndex: index,
+          message: "Glass selected. Tap another glass to pour.",
+        });
+        return;
       }
 
-      if (current.selectedCupIndex === null) {
-        if (current.cups[index]?.length) {
-          return {
-            ...current,
-            selectedCupIndex: index,
-            message: "Glass selected. Tap another glass to pour.",
-          };
-        }
+      setSortState({
+        ...sortState,
+        message: "That glass is empty. Choose another glass!",
+      });
+      return;
+    }
 
-        return {
-          ...current,
-          message: "That glass is empty. Choose another glass!",
-        };
-      }
+    if (sortState.selectedCupIndex === index) {
+      setSortState({
+        ...sortState,
+        selectedCupIndex: null,
+        message: "Deselected glass. Select a cup to start.",
+      });
+      return;
+    }
 
-      if (current.selectedCupIndex === index) {
-        return {
-          ...current,
-          selectedCupIndex: null,
-          message: "Deselected glass. Select a cup to start.",
-        };
-      }
+    const nextState = attemptPour(sortState, sortState.selectedCupIndex, index);
 
-      const nextState = attemptPour(current, current.selectedCupIndex, index);
+    if (checkWin(nextState.cups) && profile) {
+      const nextProfile = applyLevelReward(profile);
+      setProfile(nextProfile);
+      setSortState(createLevelState(nextProfile.currentLevelIndex));
+      return;
+    }
 
-      if (checkWin(nextState.cups)) {
-        setProfile((currentProfile) =>
-          currentProfile ? applyLevelReward(currentProfile) : currentProfile,
-        );
-
-        return {
-          ...nextState,
-          message: "Level complete! Reward unlocked.",
-        };
-      }
-
-      return nextState;
-    });
+    setSortState(nextState);
   }
 
   function useExtraCup() {
