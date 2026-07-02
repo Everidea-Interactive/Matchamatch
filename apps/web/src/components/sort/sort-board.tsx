@@ -4,10 +4,10 @@ import type {
   SortState,
 } from "@matchamatch/game-core";
 import { canPour } from "@matchamatch/game-core";
+import Image from "next/image";
 import { useMemo } from "react";
 import type { SortFeedbackEvent } from "@/hooks/use-matchamatch-app";
 import { CupStack } from "./cup-stack";
-import { RetryLeafIcon } from "./retry-leaf-icon";
 
 const MAX_RETRY_LEAVES = 3;
 
@@ -112,9 +112,26 @@ export function SortBoard({
               <span className="sr-only">
                 Retries Left {profile.retryBudgetRemaining}
               </span>
-              {retryLeaves.map((isActive, index) => (
-                <RetryLeafIcon key={`retry-leaf-${index}`} isActive={isActive} />
-              ))}
+              {retryLeaves.map((isActive, index) => {
+                const retryLeafSrc = isActive
+                  ? "/icons/retry-leaf-active.svg"
+                  : "/icons/retry-leaf-inactive.svg";
+
+                return (
+                  <Image
+                    key={`retry-leaf-${index}`}
+                    alt=""
+                    aria-hidden="true"
+                    className={`h-[18px] w-[18px] ${
+                      isActive ? "opacity-100" : "opacity-30"
+                    }`}
+                    height={18}
+                    src={retryLeafSrc}
+                    unoptimized
+                    width={18}
+                  />
+                );
+              })}
             </div>
           </div>
         </header>
