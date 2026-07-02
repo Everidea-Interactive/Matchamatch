@@ -1,10 +1,12 @@
 export type Cup = string[];
+export type SortStatus = "active" | "won" | "failed";
 
 export interface LevelDefinition {
   name: string;
   recipe: string;
   description: string;
   cups: Cup[];
+  moveLimit: number;
 }
 
 export type SkinId =
@@ -24,7 +26,11 @@ export interface SkinDefinition {
 export interface SortState {
   cups: Cup[];
   selectedCupIndex: number | null;
-  hasAddedCup: boolean;
   history: Cup[][];
   message: string;
+  moveLimit: number;
+  movesUsed: number;
+  restartRemaining: number;
+  status: SortStatus;
+  undoRemaining: number;
 }

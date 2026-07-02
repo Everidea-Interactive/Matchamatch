@@ -8,6 +8,7 @@ export interface StorageLike {
 
 export interface LocalProfile {
   version: 1;
+  retryBudgetRemaining: number;
   currentLevelIndex: number;
   dailyScore: number;
   dailyStreak: number;
@@ -17,9 +18,11 @@ export interface LocalProfile {
 }
 
 export const PROFILE_STORAGE_KEY = "matchamatch.profile.v1";
+export const DEFAULT_RETRY_BUDGET = 3;
 
 export const DEFAULT_PROFILE: LocalProfile = {
   version: 1,
+  retryBudgetRemaining: DEFAULT_RETRY_BUDGET,
   currentLevelIndex: 0,
   dailyScore: 150,
   dailyStreak: 4,
@@ -63,6 +66,8 @@ export function loadProfile(storage: StorageLike): LocalProfile {
       currentLevelIndex: clampLevelIndex(
         parsed.currentLevelIndex ?? DEFAULT_PROFILE.currentLevelIndex,
       ),
+      retryBudgetRemaining:
+        parsed.retryBudgetRemaining ?? DEFAULT_PROFILE.retryBudgetRemaining,
       unlockedSkins: normalizeUnlockedSkins(parsed.unlockedSkins),
       activeSkin: parsed.activeSkin ?? DEFAULT_PROFILE.activeSkin,
       version: 1,
@@ -81,6 +86,21 @@ export function applyLevelReward(profile: LocalProfile): LocalProfile {
     ...profile,
     dailyScore: profile.dailyScore + 50,
     currentLevelIndex: clampLevelIndex(profile.currentLevelIndex + 1),
+  };
+}
+
+export function applyFailurePenalty(profile: LocalProfile): LocalProfile {
+  if (profile.retryBudgetRemaining <= 1) {
+    return {
+      ...profile,
+      currentLevelIndex: 0,
+      retryBudgetRemaining: DEFAULT_RETRY_BUDGET,
+    };
+  }
+
+  return {
+    ...profile,
+    retryBudgetRemaining: profile.retryBudgetRemaining - 1,
   };
 }
 

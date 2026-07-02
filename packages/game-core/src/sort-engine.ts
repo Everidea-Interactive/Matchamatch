@@ -1,25 +1,31 @@
 import type { Cup, SortState } from "./types";
 
 const CUP_CAPACITY = 3;
+export const DEFAULT_RESTART_LIMIT = 1;
+export const DEFAULT_UNDO_LIMIT = 5;
 export const INITIAL_SORT_MESSAGE = "Tap a cup to select, then tap another to pour.";
-const MISMATCH_MESSAGE =
-  "Mismatched ingredients! Pour onto matching colors only.";
+const MISMATCH_MESSAGE = "Wrong color. Match colors only.";
 const FULL_CUP_MESSAGE = "Oops! That glass is full.";
+const MOVE_LIMIT_MESSAGE = "Move limit reached! Level failed.";
 const SUCCESS_MESSAGE = "Satisfying pour! Keep it up.";
-const EXTRA_CUP_MESSAGE = "Empty glass added! You now have more options.";
+const WIN_MESSAGE = "Perfect service! Level cleared.";
 const UNDO_MESSAGE = "Undo applied! Keep sorting.";
 
 export function cloneCups(cups: Cup[]): Cup[] {
   return cups.map((cup) => [...cup]);
 }
 
-export function createSortState(seedCups: Cup[]): SortState {
+export function createSortState(seedCups: Cup[], moveLimit: number): SortState {
   return {
     cups: cloneCups(seedCups),
     selectedCupIndex: null,
-    hasAddedCup: false,
     history: [],
     message: INITIAL_SORT_MESSAGE,
+    moveLimit,
+    movesUsed: 0,
+    restartRemaining: DEFAULT_RESTART_LIMIT,
+    status: "active",
+    undoRemaining: DEFAULT_UNDO_LIMIT,
   };
 }
 
@@ -69,6 +75,10 @@ export function attemptPour(
   sourceIndex: number,
   destinationIndex: number,
 ): SortState {
+  if (state.status !== "active") {
+    return state;
+  }
+
   if (!canPour(state.cups, sourceIndex, destinationIndex)) {
     return {
       ...state,
@@ -113,30 +123,45 @@ export function attemptPour(
     destination.push(topColor);
   }
 
+  const movesUsed = state.movesUsed + 1;
+  const hasWon = checkWin(cups);
+  const hasFailed = !hasWon && movesUsed >= state.moveLimit;
+
   return {
     ...state,
     cups,
     selectedCupIndex: null,
     history: [...state.history, cloneCups(state.cups)],
-    message: SUCCESS_MESSAGE,
+    message: hasWon
+      ? WIN_MESSAGE
+      : hasFailed
+        ? MOVE_LIMIT_MESSAGE
+        : SUCCESS_MESSAGE,
+    movesUsed,
+    status: hasWon ? "won" : hasFailed ? "failed" : "active",
   };
 }
 
-export function usePowerUp(state: SortState): SortState {
-  if (state.hasAddedCup) {
+export function restartSortState(
+  state: SortState,
+  seedCups: Cup[],
+  moveLimit: number,
+): SortState {
+  if (state.status !== "active" || state.restartRemaining === 0) {
     return state;
   }
 
   return {
-    ...state,
-    cups: [...cloneCups(state.cups), []],
-    hasAddedCup: true,
-    history: [...state.history, cloneCups(state.cups)],
-    message: EXTRA_CUP_MESSAGE,
+    ...createSortState(seedCups, moveLimit),
+    restartRemaining: state.restartRemaining - 1,
   };
 }
 
 export function undoSortMove(state: SortState): SortState {
+  if (state.status !== "active" || state.undoRemaining === 0) {
+    return state;
+  }
+
   const previous = state.history.at(-1);
 
   if (!previous) {
@@ -149,6 +174,8 @@ export function undoSortMove(state: SortState): SortState {
     selectedCupIndex: null,
     history: state.history.slice(0, -1),
     message: UNDO_MESSAGE,
+    movesUsed: Math.max(state.movesUsed - 1, 0),
+    undoRemaining: state.undoRemaining - 1,
   };
 }
 

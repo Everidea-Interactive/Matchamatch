@@ -7,15 +7,15 @@ import {
   LEVELS,
   SKINS,
   applyCaptureReward,
+  applyFailurePenalty,
   applyLevelReward,
   attemptPour,
   canPour,
-  checkWin,
   createSortState,
   loadProfile,
+  restartSortState,
   saveProfile,
   undoSortMove,
-  usePowerUp as applyPowerUp,
   type MatchaDetection,
   type LocalProfile,
   type SortState,
@@ -28,8 +28,7 @@ export type SortFeedbackKind =
   | "empty"
   | "invalid"
   | "success"
-  | "undo"
-  | "powerup";
+  | "undo";
 
 export interface SortFeedbackEvent {
   id: number;
@@ -40,6 +39,7 @@ export interface SortFeedbackEvent {
 
 export function useMatchamatchApp() {
   const [profile, setProfile] = useState<LocalProfile | null>(null);
+  const [currentBoardLevelIndex, setCurrentBoardLevelIndex] = useState(0);
   const [sortState, setSortState] = useState<SortState | null>(null);
   const [activeTab, setActiveTabState] = useState<"sort" | "go">("sort");
   const [scannerFeedback, setScannerFeedback] = useState(
@@ -60,7 +60,19 @@ export function useMatchamatchApp() {
   const levelAdvanceTimeoutRef = useRef<number | null>(null);
 
   function createLevelState(levelIndex: number) {
-    return createSortState((LEVELS[levelIndex] ?? LEVELS[0]).cups);
+    const level = LEVELS[levelIndex] ?? LEVELS[0];
+    return createSortState(level.cups, level.moveLimit);
+  }
+
+  function getFailureMessage(
+    failedProfile: LocalProfile,
+    didResetToLevelOne: boolean,
+  ) {
+    if (didResetToLevelOne) {
+      return "Move limit reached! Retry budget refilled. Back to Cafe Level 1.";
+    }
+
+    return `Move limit reached! ${failedProfile.retryBudgetRemaining} retries left.`;
   }
 
   function emitSortFeedback(
@@ -73,6 +85,15 @@ export function useMatchamatchApp() {
       kind,
       sourceIndex,
       destinationIndex,
+    }));
+  }
+
+  function resetSortFeedback() {
+    setSortFeedbackEvent((current) => ({
+      id: current.id + 1,
+      kind: "idle",
+      sourceIndex: null,
+      destinationIndex: null,
     }));
   }
 
@@ -116,6 +137,7 @@ export function useMatchamatchApp() {
   useEffect(() => {
     const nextProfile = loadProfile(window.localStorage);
     setProfile(nextProfile);
+    setCurrentBoardLevelIndex(nextProfile.currentLevelIndex);
     setSortState(createLevelState(nextProfile.currentLevelIndex));
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
@@ -151,19 +173,38 @@ export function useMatchamatchApp() {
   }, []);
 
   const activeLevel = profile
-    ? (LEVELS[profile.currentLevelIndex] ?? LEVELS[0])
+    ? (LEVELS[currentBoardLevelIndex] ?? LEVELS[0])
     : null;
 
   function restartLevel() {
-    if (!profile || isAdvancingLevel) {
+    if (
+      !profile ||
+      !sortState ||
+      isAdvancingLevel ||
+      sortState.restartRemaining === 0 ||
+      sortState.status !== "active"
+    ) {
       return;
     }
 
-    setSortState(createLevelState(profile.currentLevelIndex));
+    resetSortFeedback();
+    setSortState(
+      restartSortState(
+        sortState,
+        (LEVELS[currentBoardLevelIndex] ?? LEVELS[0]).cups,
+        (LEVELS[currentBoardLevelIndex] ?? LEVELS[0]).moveLimit,
+      ),
+    );
   }
 
   function undoMove() {
-    if (!sortState || isAdvancingLevel || sortState.history.length === 0) {
+    if (
+      !sortState ||
+      isAdvancingLevel ||
+      sortState.history.length === 0 ||
+      sortState.undoRemaining === 0 ||
+      sortState.status !== "active"
+    ) {
       return;
     }
 
@@ -172,7 +213,7 @@ export function useMatchamatchApp() {
   }
 
   function onCupPress(index: number) {
-    if (!sortState || isAdvancingLevel) {
+    if (!sortState || isAdvancingLevel || sortState.status !== "active") {
       return;
     }
 
@@ -215,7 +256,7 @@ export function useMatchamatchApp() {
       return;
     }
 
-    if (checkWin(nextState.cups) && profile) {
+    if (nextState.status === "won" && profile) {
       emitSortFeedback("success", sourceIndex, index);
       setSortState(nextState);
       setIsAdvancingLevel(true);
@@ -223,6 +264,8 @@ export function useMatchamatchApp() {
       const nextProfile = applyLevelReward(profile);
       levelAdvanceTimeoutRef.current = window.setTimeout(() => {
         setProfile(nextProfile);
+        setCurrentBoardLevelIndex(nextProfile.currentLevelIndex);
+        resetSortFeedback();
         setSortState(createLevelState(nextProfile.currentLevelIndex));
         setScorePulseKey((current) => current + 1);
         setIsAdvancingLevel(false);
@@ -232,17 +275,31 @@ export function useMatchamatchApp() {
       return;
     }
 
+    if (nextState.status === "failed" && profile) {
+      const nextProfile = applyFailurePenalty(profile);
+      const didResetToLevelOne = profile.retryBudgetRemaining === 1;
+
+      emitSortFeedback("success", sourceIndex, index);
+      setProfile(nextProfile);
+      setSortState({
+        ...nextState,
+        message: getFailureMessage(nextProfile, didResetToLevelOne),
+      });
+      return;
+    }
+
     emitSortFeedback("success", sourceIndex, index);
     setSortState(nextState);
   }
 
-  function useExtraCup() {
-    if (!sortState || isAdvancingLevel || sortState.hasAddedCup) {
+  function tryAgain() {
+    if (!profile || !sortState || sortState.status !== "failed") {
       return;
     }
 
-    emitSortFeedback("powerup", null, sortState.cups.length);
-    setSortState(applyPowerUp(sortState));
+    setCurrentBoardLevelIndex(profile.currentLevelIndex);
+    resetSortFeedback();
+    setSortState(createLevelState(profile.currentLevelIndex));
   }
 
   function applyScannerResult(result: MatchaDetection) {
@@ -282,6 +339,7 @@ export function useMatchamatchApp() {
     activeLevel,
     activeTab,
     applyScannerResult,
+    currentBoardLevelIndex,
     onCupPress,
     profile,
     recentUnlockedSkinIds,
@@ -294,8 +352,8 @@ export function useMatchamatchApp() {
     scorePulseKey,
     sortState,
     sortFeedbackEvent,
+    tryAgain,
     undoMove,
-    useExtraCup,
     advanceLevel: () =>
       setProfile((current) => (current ? applyLevelReward(current) : current)),
   };

@@ -7,28 +7,34 @@ import { canPour } from "@matchamatch/game-core";
 import { useMemo } from "react";
 import type { SortFeedbackEvent } from "@/hooks/use-matchamatch-app";
 import { CupStack } from "./cup-stack";
+import { RetryLeafIcon } from "./retry-leaf-icon";
+
+const MAX_RETRY_LEAVES = 3;
 
 export function SortBoard({
   activeLevel,
+  activeLevelIndex,
   onCupPress,
   onRestart,
+  onTryAgain,
   onUndo,
-  onUsePowerUp,
   profile,
   scorePulseKey,
   sortState,
   sortFeedbackEvent,
 }: {
   activeLevel: LevelDefinition;
+  activeLevelIndex: number;
   onCupPress: (index: number) => void;
   onRestart: () => void;
+  onTryAgain: () => void;
   onUndo: () => void;
-  onUsePowerUp: () => void;
   profile: LocalProfile;
   scorePulseKey: number;
   sortState: SortState;
   sortFeedbackEvent: SortFeedbackEvent;
 }) {
+  const showFailureModal = sortState.status === "failed";
   const candidateTargets = useMemo(() => {
     const selectedCupIndex = sortState.selectedCupIndex;
 
@@ -45,128 +51,196 @@ export function SortBoard({
 
   const isInvalidMessage =
     sortFeedbackEvent.kind === "invalid" || sortFeedbackEvent.kind === "empty";
-  const isSuccessMessage =
-    sortFeedbackEvent.kind === "success" || sortFeedbackEvent.kind === "powerup";
+  const isSuccessMessage = sortFeedbackEvent.kind === "success";
+  const areBoardActionsLocked = sortState.status !== "active";
+  const failureMessage = showFailureModal
+    ? sortState.message.replace(/^Move limit reached!\s*/u, "").trim()
+    : "";
+  const retryLeaves = Array.from({ length: MAX_RETRY_LEAVES }, (_, index) => {
+    return index < profile.retryBudgetRemaining;
+  });
 
   return (
-    <section className="mm-card-sheen rounded-[28px] bg-[linear-gradient(180deg,rgba(250,252,246,0.96),rgba(238,245,230,0.88))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
-      <header className="mb-5">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#7A986E]">
-              Cafe Level {profile.currentLevelIndex + 1}
-            </p>
-            <h1 className="mt-2 text-3xl font-bold tracking-[-0.04em] text-[#2E3625]">
-              {activeLevel.name}
-            </h1>
-            <p className="mt-2 text-sm font-medium text-[#5D6B4A]">
-              {activeLevel.recipe}
-            </p>
+    <section className="mm-card-sheen relative overflow-hidden rounded-[34px] bg-[linear-gradient(180deg,rgba(252,252,248,0.98),rgba(242,247,235,0.92))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.88)] sm:p-6">
+      <div
+        aria-hidden={showFailureModal}
+        className={
+          showFailureModal
+            ? "pointer-events-none select-none opacity-35 blur-[2px]"
+            : ""
+        }
+      >
+        <header className="mb-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[#9A9A80]">
+                Cafe Level {activeLevelIndex + 1}
+              </p>
+              <h1 className="mt-3 max-w-[9ch] text-[2.15rem] leading-[0.98] font-bold tracking-[-0.05em] text-[#343328] sm:text-[2.35rem]">
+                {activeLevel.name}
+              </h1>
+            </div>
+            <div className="flex flex-col items-end gap-3">
+              <div className="rounded-[24px] bg-white/88 px-5 py-4 text-center shadow-[0_16px_30px_rgba(144,149,120,0.14)] transition-transform duration-300 ease-[var(--mm-ease-spring)] hover:-translate-y-0.5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#A0A184]">
+                  Daily Score
+                </p>
+                <p
+                  key={`score-${scorePulseKey}`}
+                  className={`mt-1 text-[2rem] leading-none font-bold text-[#343328] ${
+                    scorePulseKey > 0 ? "mm-score-pop" : ""
+                  }`}
+                >
+                  {profile.dailyScore}
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="rounded-2xl bg-white/75 px-4 py-3 text-right shadow-sm transition-transform duration-300 ease-[var(--mm-ease-spring)] hover:-translate-y-0.5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8AA07D]">
-              Daily Score
-            </p>
-            <p
-              key={`score-${scorePulseKey}`}
-              className={`mt-1 text-2xl font-bold text-[#3A432E] ${
-                scorePulseKey > 0 ? "mm-score-pop" : ""
-              }`}
+          <div className="mt-4 flex items-center justify-between gap-3 text-[#66664F]">
+            <div data-testid="moves-counter">
+              <p className="text-[1.05rem] font-medium">
+                Moves{" "}
+                <span className="font-semibold text-[#2E3625]">
+                  {sortState.movesUsed} / {sortState.moveLimit}
+                </span>
+              </p>
+            </div>
+            <div
+              className="flex shrink-0 items-center gap-2"
+              data-testid="retry-counter"
             >
-              {profile.dailyScore}
+              <span className="sr-only">
+                Retries Left {profile.retryBudgetRemaining}
+              </span>
+              {retryLeaves.map((isActive, index) => (
+                <RetryLeafIcon key={`retry-leaf-${index}`} isActive={isActive} />
+              ))}
+            </div>
+          </div>
+        </header>
+
+        <div
+          className="grid grid-cols-3 gap-x-5 gap-y-4 sm:gap-x-6 sm:gap-y-5"
+          data-testid="cups-grid"
+        >
+          {sortState.cups.map((cup, index) => (
+            <CupStack
+              key={`${index}-${cup.join("-")}-${sortFeedbackEvent.id}`}
+              cup={cup}
+              feedbackId={sortFeedbackEvent.id}
+              index={index}
+              isCandidateTarget={candidateTargets.has(index)}
+              isDeselecting={
+                sortFeedbackEvent.kind === "deselect" &&
+                sortFeedbackEvent.sourceIndex === index
+              }
+              isEmptyTap={
+                sortFeedbackEvent.kind === "empty" &&
+                sortFeedbackEvent.sourceIndex === index
+              }
+              isInvalidTarget={
+                sortFeedbackEvent.kind === "invalid" &&
+                sortFeedbackEvent.destinationIndex === index
+              }
+              isPourDestination={
+                sortFeedbackEvent.kind === "success" &&
+                sortFeedbackEvent.destinationIndex === index
+              }
+              isPourSource={
+                sortFeedbackEvent.kind === "success" &&
+                sortFeedbackEvent.sourceIndex === index
+              }
+              isSelected={sortState.selectedCupIndex === index}
+              isSelectionPulse={
+                sortFeedbackEvent.kind === "select" &&
+                sortFeedbackEvent.sourceIndex === index
+              }
+              isDisabled={areBoardActionsLocked}
+              onPress={() => onCupPress(index)}
+            />
+          ))}
+        </div>
+
+        <p
+          key={`message-${sortFeedbackEvent.id}`}
+          className={`mm-feedback-in mt-5 min-h-6 text-sm font-medium ${
+            isInvalidMessage
+              ? "text-[#815E4A]"
+              : isSuccessMessage
+                ? "text-[#44603E]"
+                : "text-[#4C5A3F]"
+          }`}
+        >
+          {showFailureModal ? "" : sortState.message}
+        </p>
+        <div className="sr-only">
+          <p data-testid="undo-counter">Undo Left {sortState.undoRemaining}</p>
+          <p data-testid="restart-counter">
+            Restart Left {sortState.restartRemaining}
+          </p>
+        </div>
+        <div className="mt-5 grid grid-cols-2 gap-3">
+          <button
+            aria-label="Undo"
+            className="mm-button rounded-[18px] bg-[#7b8d5d] px-4 py-3 text-sm font-semibold text-[#fffdf6] shadow-[0_16px_30px_rgba(123,141,93,0.22)] disabled:cursor-not-allowed disabled:opacity-45"
+            disabled={
+              areBoardActionsLocked ||
+              sortState.history.length === 0 ||
+              sortState.undoRemaining === 0
+            }
+            onClick={onUndo}
+            type="button"
+          >
+            Undo ({sortState.undoRemaining})
+          </button>
+          <button
+            aria-label="Restart"
+            className="mm-button rounded-[18px] border border-[#e7e3d8] bg-white px-4 py-3 text-sm font-semibold text-[#3A432E] shadow-[0_12px_24px_rgba(180,184,162,0.12)] disabled:cursor-not-allowed disabled:opacity-45"
+            disabled={areBoardActionsLocked || sortState.restartRemaining === 0}
+            onClick={onRestart}
+            type="button"
+          >
+            Restart ({sortState.restartRemaining})
+          </button>
+        </div>
+      </div>
+
+      {showFailureModal ? (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.7),rgba(232,238,220,0.94))] px-5 py-6">
+          <div
+            aria-describedby="sort-failure-description"
+            aria-labelledby="sort-failure-title"
+            aria-modal="true"
+            className="mm-card-sheen w-full max-w-[22rem] rounded-[30px] border border-white/70 bg-[linear-gradient(180deg,rgba(252,252,248,0.99),rgba(242,247,235,0.97))] p-6 text-center shadow-[0_24px_60px_rgba(126,138,101,0.24)]"
+            role="dialog"
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#9A9A80]">
+              Level Failed
             </p>
+            <h2
+              className="mt-3 text-[1.85rem] leading-[1.02] font-bold tracking-[-0.05em] text-[#343328]"
+              id="sort-failure-title"
+            >
+              Move limit reached
+            </h2>
+            <p
+              className="mt-3 text-sm font-medium leading-6 text-[#66664F]"
+              id="sort-failure-description"
+            >
+              {failureMessage}
+            </p>
+            <button
+              aria-label="Retry"
+              autoFocus
+              className="mm-button mt-5 w-full rounded-[18px] bg-[#7b8d5d] px-4 py-3 text-sm font-semibold text-white shadow-[0_16px_30px_rgba(123,141,93,0.22)]"
+              onClick={onTryAgain}
+              type="button"
+            >
+              Retry
+            </button>
           </div>
         </div>
-      </header>
-
-      <div
-        className="grid gap-4"
-        data-testid="cups-grid"
-        style={{
-          gridTemplateColumns: "repeat(auto-fit, minmax(88px, 1fr))",
-        }}
-      >
-        {sortState.cups.map((cup, index) => (
-          <CupStack
-            key={`${index}-${cup.join("-")}-${sortFeedbackEvent.id}`}
-            cup={cup}
-            feedbackId={sortFeedbackEvent.id}
-            index={index}
-            isCandidateTarget={candidateTargets.has(index)}
-            isDeselecting={
-              sortFeedbackEvent.kind === "deselect" &&
-              sortFeedbackEvent.sourceIndex === index
-            }
-            isEmptyTap={
-              sortFeedbackEvent.kind === "empty" &&
-              sortFeedbackEvent.sourceIndex === index
-            }
-            isInvalidTarget={
-              sortFeedbackEvent.kind === "invalid" &&
-              sortFeedbackEvent.destinationIndex === index
-            }
-            isPowerUpTarget={
-              sortFeedbackEvent.kind === "powerup" &&
-              sortFeedbackEvent.destinationIndex === index
-            }
-            isPourDestination={
-              sortFeedbackEvent.kind === "success" &&
-              sortFeedbackEvent.destinationIndex === index
-            }
-            isPourSource={
-              sortFeedbackEvent.kind === "success" &&
-              sortFeedbackEvent.sourceIndex === index
-            }
-            isSelected={sortState.selectedCupIndex === index}
-            isSelectionPulse={
-              sortFeedbackEvent.kind === "select" &&
-              sortFeedbackEvent.sourceIndex === index
-            }
-            onPress={() => onCupPress(index)}
-          />
-        ))}
-      </div>
-
-      <p
-        key={`message-${sortFeedbackEvent.id}`}
-        className={`mm-feedback-in mt-4 min-h-6 text-sm font-medium ${
-          isInvalidMessage
-            ? "text-[#815E4A]"
-            : isSuccessMessage
-              ? "text-[#44603E]"
-              : "text-[#4C5A3F]"
-        }`}
-      >
-        {sortState.message}
-      </p>
-      <div className="mt-5 flex flex-wrap gap-2">
-        <button
-          aria-label="Undo"
-          className="mm-button rounded-xl bg-[#3A432E] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(58,67,46,0.18)] disabled:cursor-not-allowed disabled:opacity-30"
-          disabled={sortState.history.length === 0}
-          onClick={onUndo}
-          type="button"
-        >
-          Undo
-        </button>
-        <button
-          aria-label="Restart"
-          className="mm-button rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[#3A432E] shadow-sm"
-          onClick={onRestart}
-          type="button"
-        >
-          Restart
-        </button>
-        <button
-          aria-label="Power Up"
-          className="mm-button rounded-xl bg-[#76895C] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(118,137,92,0.18)] disabled:cursor-not-allowed disabled:opacity-40"
-          disabled={sortState.hasAddedCup}
-          onClick={onUsePowerUp}
-          type="button"
-        >
-          {sortState.hasAddedCup ? "Clean Glass Added" : "+ Clean Glass"}
-        </button>
-      </div>
+      ) : null}
     </section>
   );
 }
