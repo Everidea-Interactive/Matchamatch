@@ -47,8 +47,8 @@ export function CupStack({
       aria-pressed={isSelected}
       className={
         isSelected
-          ? `mm-cup ${animationClassName} flex h-44 flex-col-reverse overflow-hidden rounded-[30px] border border-[#d7d8ca] bg-white/88 shadow-[0_22px_36px_rgba(177,182,151,0.18)] ring-4 ring-[#d8e2bf]/85`
-          : `mm-cup ${animationClassName} flex h-44 flex-col-reverse overflow-hidden rounded-[30px] border border-[#dcdccc] bg-white/72 shadow-[0_18px_32px_rgba(177,182,151,0.13)] hover:-translate-y-0.5 hover:shadow-[0_22px_36px_rgba(177,182,151,0.18)]`
+          ? `mm-cup ${animationClassName} flex h-[var(--mm-cup-height)] flex-col-reverse overflow-hidden rounded-[28px] border border-[#d7d8ca] bg-white/88 shadow-[0_18px_28px_rgba(177,182,151,0.18)] ring-3 ring-[#d8e2bf]/85 sm:shadow-[0_22px_36px_rgba(177,182,151,0.18)] sm:ring-4`
+          : `mm-cup ${animationClassName} flex h-[var(--mm-cup-height)] flex-col-reverse overflow-hidden rounded-[28px] border border-[#dcdccc] bg-white/72 shadow-[0_14px_24px_rgba(177,182,151,0.13)] hover:-translate-y-0.5 hover:shadow-[0_18px_28px_rgba(177,182,151,0.18)] sm:shadow-[0_18px_32px_rgba(177,182,151,0.13)] sm:hover:shadow-[0_22px_36px_rgba(177,182,151,0.18)]`
       }
       data-testid={`cup-${index}`}
       disabled={isDisabled}

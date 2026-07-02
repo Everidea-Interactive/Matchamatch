@@ -5,7 +5,7 @@ import type {
 } from "@matchamatch/game-core";
 import { canPour } from "@matchamatch/game-core";
 import Image from "next/image";
-import { useMemo } from "react";
+import { type CSSProperties, useMemo } from "react";
 import type { SortFeedbackEvent } from "@/hooks/use-matchamatch-app";
 import { CupStack } from "./cup-stack";
 
@@ -59,9 +59,16 @@ export function SortBoard({
   const retryLeaves = Array.from({ length: MAX_RETRY_LEAVES }, (_, index) => {
     return index < profile.retryBudgetRemaining;
   });
+  const cupRows = Math.ceil(sortState.cups.length / 3);
+  const boardStyle = {
+    "--mm-cup-height": `max(5.4rem, min(11rem, calc((100svh - 23.5rem) / ${cupRows})))`,
+  } as CSSProperties;
 
   return (
-    <section className="mm-card-sheen relative overflow-hidden rounded-[34px] bg-[linear-gradient(180deg,rgba(252,252,248,0.98),rgba(242,247,235,0.92))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.88)] sm:p-6">
+    <section
+      className="mm-card-sheen relative overflow-hidden rounded-[30px] bg-[linear-gradient(180deg,rgba(252,252,248,0.98),rgba(242,247,235,0.92))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.88)] sm:rounded-[34px] sm:p-6"
+      style={boardStyle}
+    >
       <div
         aria-hidden={showFailureModal}
         className={
@@ -70,24 +77,24 @@ export function SortBoard({
             : ""
         }
       >
-        <header className="mb-6">
-          <div className="flex items-start justify-between gap-4">
+        <header className="mb-4 sm:mb-6">
+          <div className="flex items-start justify-between gap-3 sm:gap-4">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[#9A9A80]">
                 Cafe Level {activeLevelIndex + 1}
               </p>
-              <h1 className="mt-3 max-w-[9ch] text-[2.15rem] leading-[0.98] font-bold tracking-[-0.05em] text-[#343328] sm:text-[2.35rem]">
+              <h1 className="mt-2 max-w-[9ch] text-[1.9rem] leading-[0.98] font-bold tracking-[-0.05em] text-[#343328] sm:mt-3 sm:text-[2.35rem]">
                 {activeLevel.name}
               </h1>
             </div>
-            <div className="flex flex-col items-end gap-3">
-              <div className="rounded-[24px] bg-white/88 px-5 py-4 text-center shadow-[0_16px_30px_rgba(144,149,120,0.14)] transition-transform duration-300 ease-[var(--mm-ease-spring)] hover:-translate-y-0.5">
+            <div className="flex flex-col items-end gap-2 sm:gap-3">
+              <div className="rounded-[20px] bg-white/88 px-4 py-3 text-center shadow-[0_12px_24px_rgba(144,149,120,0.14)] transition-transform duration-300 ease-[var(--mm-ease-spring)] hover:-translate-y-0.5 sm:rounded-[24px] sm:px-5 sm:py-4 sm:shadow-[0_16px_30px_rgba(144,149,120,0.14)]">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#A0A184]">
                   Daily Score
                 </p>
                 <p
                   key={`score-${scorePulseKey}`}
-                  className={`mt-1 text-[2rem] leading-none font-bold text-[#343328] ${
+                  className={`mt-1 text-[1.8rem] leading-none font-bold text-[#343328] sm:text-[2rem] ${
                     scorePulseKey > 0 ? "mm-score-pop" : ""
                   }`}
                 >
@@ -96,9 +103,9 @@ export function SortBoard({
               </div>
             </div>
           </div>
-          <div className="mt-4 flex items-center justify-between gap-3 text-[#66664F]">
+          <div className="mt-3 flex items-center justify-between gap-3 text-[#66664F] sm:mt-4">
             <div data-testid="moves-counter">
-              <p className="text-[1.05rem] font-medium">
+              <p className="text-[0.98rem] font-medium sm:text-[1.05rem]">
                 Moves{" "}
                 <span className="font-semibold text-[#2E3625]">
                   {sortState.movesUsed} / {sortState.moveLimit}
@@ -137,7 +144,7 @@ export function SortBoard({
         </header>
 
         <div
-          className="grid grid-cols-3 gap-x-5 gap-y-4 sm:gap-x-6 sm:gap-y-5"
+          className="grid grid-cols-3 gap-x-3 gap-y-3 sm:gap-x-6 sm:gap-y-5"
           data-testid="cups-grid"
         >
           {sortState.cups.map((cup, index) => (
@@ -180,7 +187,7 @@ export function SortBoard({
 
         <p
           key={`message-${sortFeedbackEvent.id}`}
-          className={`mm-feedback-in mt-5 min-h-6 text-sm font-medium ${
+          className={`mm-feedback-in mt-3 min-h-5 text-[13px] font-medium sm:mt-5 sm:min-h-6 sm:text-sm ${
             isInvalidMessage
               ? "text-[#815E4A]"
               : isSuccessMessage
@@ -196,10 +203,10 @@ export function SortBoard({
             Restart Left {sortState.restartRemaining}
           </p>
         </div>
-        <div className="mt-5 grid grid-cols-2 gap-3">
+        <div className="mt-3 grid grid-cols-2 gap-2.5 sm:mt-5 sm:gap-3">
           <button
             aria-label="Undo"
-            className="mm-button rounded-[18px] bg-[#7b8d5d] px-4 py-3 text-sm font-semibold text-[#fffdf6] shadow-[0_16px_30px_rgba(123,141,93,0.22)] disabled:cursor-not-allowed disabled:opacity-45"
+            className="mm-button rounded-[16px] bg-[#7b8d5d] px-4 py-2.5 text-sm font-semibold text-[#fffdf6] shadow-[0_12px_24px_rgba(123,141,93,0.22)] disabled:cursor-not-allowed disabled:opacity-45 sm:rounded-[18px] sm:py-3 sm:shadow-[0_16px_30px_rgba(123,141,93,0.22)]"
             disabled={
               areBoardActionsLocked ||
               sortState.history.length === 0 ||
@@ -212,7 +219,7 @@ export function SortBoard({
           </button>
           <button
             aria-label="Restart"
-            className="mm-button rounded-[18px] border border-[#e7e3d8] bg-white px-4 py-3 text-sm font-semibold text-[#3A432E] shadow-[0_12px_24px_rgba(180,184,162,0.12)] disabled:cursor-not-allowed disabled:opacity-45"
+            className="mm-button rounded-[16px] border border-[#e7e3d8] bg-white px-4 py-2.5 text-sm font-semibold text-[#3A432E] shadow-[0_10px_20px_rgba(180,184,162,0.12)] disabled:cursor-not-allowed disabled:opacity-45 sm:rounded-[18px] sm:py-3 sm:shadow-[0_12px_24px_rgba(180,184,162,0.12)]"
             disabled={areBoardActionsLocked || sortState.restartRemaining === 0}
             onClick={onRestart}
             type="button"
@@ -223,19 +230,19 @@ export function SortBoard({
       </div>
 
       {showFailureModal ? (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.7),rgba(232,238,220,0.94))] px-5 py-6">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.7),rgba(232,238,220,0.94))] px-4 py-5 sm:px-5 sm:py-6">
           <div
             aria-describedby="sort-failure-description"
             aria-labelledby="sort-failure-title"
             aria-modal="true"
-            className="mm-card-sheen w-full max-w-[22rem] rounded-[30px] border border-white/70 bg-[linear-gradient(180deg,rgba(252,252,248,0.99),rgba(242,247,235,0.97))] p-6 text-center shadow-[0_24px_60px_rgba(126,138,101,0.24)]"
+            className="mm-card-sheen w-full max-w-[22rem] rounded-[28px] border border-white/70 bg-[linear-gradient(180deg,rgba(252,252,248,0.99),rgba(242,247,235,0.97))] p-5 text-center shadow-[0_20px_48px_rgba(126,138,101,0.24)] sm:rounded-[30px] sm:p-6 sm:shadow-[0_24px_60px_rgba(126,138,101,0.24)]"
             role="dialog"
           >
             <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#9A9A80]">
               Level Failed
             </p>
             <h2
-              className="mt-3 text-[1.85rem] leading-[1.02] font-bold tracking-[-0.05em] text-[#343328]"
+              className="mt-3 text-[1.65rem] leading-[1.02] font-bold tracking-[-0.05em] text-[#343328] sm:text-[1.85rem]"
               id="sort-failure-title"
             >
               Move limit reached
@@ -249,7 +256,7 @@ export function SortBoard({
             <button
               aria-label="Retry"
               autoFocus
-              className="mm-button mt-5 w-full rounded-[18px] bg-[#7b8d5d] px-4 py-3 text-sm font-semibold text-white shadow-[0_16px_30px_rgba(123,141,93,0.22)]"
+              className="mm-button mt-5 w-full rounded-[16px] bg-[#7b8d5d] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(123,141,93,0.22)] sm:rounded-[18px] sm:py-3 sm:shadow-[0_16px_30px_rgba(123,141,93,0.22)]"
               onClick={onTryAgain}
               type="button"
             >

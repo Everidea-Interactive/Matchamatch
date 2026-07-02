@@ -177,8 +177,12 @@ test("failed level locks board and Try Again resets same level with spent retry"
     /Retries Left\s*2/,
   );
   await expect(page.getByTestId("cup-0")).toBeDisabled();
-  await expect(page.getByRole("button", { name: "Undo" })).toBeDisabled();
-  await expect(page.getByRole("button", { name: "Restart" })).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: "Undo", includeHidden: true }),
+  ).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: "Restart", includeHidden: true }),
+  ).toBeDisabled();
   await expect(page.getByRole("button", { name: "Retry" })).toBeEnabled();
 
   await page.getByRole("button", { name: "Retry" }).click();
@@ -240,4 +244,36 @@ test("third failed attempt refills retries and sends player back to level 1", as
   );
   await expect(page.getByTestId("cup-3")).toContainText("Empty");
   await expect(page.getByTestId("cup-4")).toHaveCount(0);
+});
+
+test.describe("mobile sort layout", () => {
+  test.use({
+    viewport: {
+      width: 390,
+      height: 844,
+    },
+  });
+
+  test("level 5 sort board fits without vertical page scroll", async ({
+    page,
+  }) => {
+    await seedProfile(page, {
+      currentLevelIndex: 4,
+    });
+    await page.goto("/");
+
+    await expect(page.getByText("Cafe Level 5")).toBeVisible();
+    await expect(page.getByTestId("cup-6")).toBeVisible();
+
+    const pageMetrics = await page.evaluate(() => {
+      return {
+        innerHeight: window.innerHeight,
+        scrollHeight: document.documentElement.scrollHeight,
+      };
+    });
+
+    expect(pageMetrics.scrollHeight).toBeLessThanOrEqual(
+      pageMetrics.innerHeight + 4,
+    );
+  });
 });

@@ -58,7 +58,7 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
 
   if (!activeLevel || !profile || !sortState) {
     return (
-      <main className="flex min-h-screen items-center justify-center px-4 py-8">
+      <main className="flex min-h-[100svh] items-center justify-center px-4 py-8 sm:min-h-screen">
         <p className="text-base font-medium text-[#546149]">Loading...</p>
       </main>
     );
@@ -69,10 +69,10 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
       className={
         mode === "embed"
           ? "mx-auto w-full max-w-md p-3 sm:p-4"
-          : "mx-auto min-h-screen w-full max-w-md px-3 py-5 sm:px-4 sm:py-6"
+          : "mx-auto min-h-[100svh] w-full max-w-md px-2 py-2 sm:min-h-screen sm:px-4 sm:py-6"
       }
     >
-      <div className="mm-shell-in rounded-[36px] border border-white/60 bg-[linear-gradient(180deg,rgba(250,251,243,0.78),rgba(235,243,225,0.72))] p-3 shadow-[0_28px_80px_rgba(158,166,132,0.18)] backdrop-blur-sm sm:p-4">
+      <div className="mm-shell-in rounded-[30px] border border-white/60 bg-[linear-gradient(180deg,rgba(250,251,243,0.78),rgba(235,243,225,0.72))] p-2.5 shadow-[0_22px_56px_rgba(158,166,132,0.18)] backdrop-blur-sm sm:rounded-[36px] sm:p-4 sm:shadow-[0_28px_80px_rgba(158,166,132,0.18)]">
         <TopNav activeTab={activeTab} onTabChange={setActiveTab} />
         <div key={activeTab} className="mm-panel-in">
           {activeTab === "sort" ? (
