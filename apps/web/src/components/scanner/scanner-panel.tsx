@@ -57,6 +57,20 @@ export function ScannerPanel({
     restoreMatchaCup(analyzeMatchaPixels(image));
   }
 
+  function getCameraErrorStatus(error: unknown) {
+    if (error instanceof DOMException) {
+      if (error.name === "NotAllowedError") {
+        return "Camera permission denied";
+      }
+
+      if (error.name === "NotFoundError" || error.name === "OverconstrainedError") {
+        return "Requested camera unavailable";
+      }
+    }
+
+    return "Camera unavailable";
+  }
+
   useEffect(() => {
     const startCameraTimeoutId = window.setTimeout(() => {
       void (async () => {
@@ -74,9 +88,10 @@ export function ScannerPanel({
             setIsCameraActive(true);
             setStatus("Scanner Active");
           }
-        } catch {
+        } catch (error) {
+          console.error("Camera start failed.", error);
           setIsCameraActive(false);
-          setStatus("Camera unavailable");
+          setStatus(getCameraErrorStatus(error));
         }
       })();
     }, 0);
