@@ -26,11 +26,10 @@ describe("sort-engine", () => {
   it("defines rebuilt levels with built-in empty cups and move limits", () => {
     expect(LEVELS.map(({ moveLimit, cups }) => ({ moveLimit, cups }))).toEqual([
       {
-        moveLimit: 8,
+        moveLimit: 5,
         cups: [
           [COLORS.matcha, COLORS.milk, COLORS.matcha],
-          [COLORS.milk, COLORS.strawberry, COLORS.milk],
-          [],
+          [COLORS.milk, COLORS.matcha, COLORS.milk],
           [],
         ],
       },
@@ -112,7 +111,7 @@ describe("sort-engine", () => {
       [
         [0, 2],
         [1, 0],
-        [1, 3],
+        [1, 2],
         [0, 1],
         [0, 2],
       ],
@@ -186,7 +185,7 @@ describe("sort-engine", () => {
     const winningMoves: Array<[number, number]> = [
       [0, 2],
       [1, 0],
-      [1, 3],
+      [1, 2],
       [0, 1],
       [0, 2],
     ];

@@ -16,20 +16,17 @@ const DEFAULT_PROFILE = {
 const LEVEL_ONE_WINNING_MOVES: Array<[number, number]> = [
   [0, 2],
   [1, 0],
-  [1, 3],
+  [1, 2],
   [0, 1],
   [0, 2],
 ];
 
 const LEVEL_ONE_FAILURE_MOVES: Array<[number, number]> = [
   [0, 2],
-  [2, 3],
-  [3, 2],
-  [2, 3],
-  [3, 2],
-  [2, 3],
-  [3, 2],
-  [2, 3],
+  [1, 0],
+  [2, 1],
+  [0, 2],
+  [1, 0],
 ];
 
 const LEVEL_FOUR_FAILURE_MOVES: Array<[number, number]> = [
@@ -81,7 +78,7 @@ async function seedProfile(
 test("sort HUD tracks moves, undo, restart, and retries", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page.getByTestId("moves-counter")).toHaveText(/Moves\s*0 \/ 8/);
+  await expect(page.getByTestId("moves-counter")).toHaveText(/Moves\s*0 \/ 5/);
   await expect(page.getByTestId("undo-counter")).toHaveText(/Undo Left\s*5/);
   await expect(page.getByTestId("restart-counter")).toHaveText(
     /Restart Left\s*1/,
@@ -93,12 +90,12 @@ test("sort HUD tracks moves, undo, restart, and retries", async ({ page }) => {
   await page.getByTestId("cup-0").click();
   await page.getByTestId("cup-2").click();
   await expect(page.getByText("Satisfying pour! Keep it up.")).toBeVisible();
-  await expect(page.getByTestId("moves-counter")).toHaveText(/Moves\s*1 \/ 8/);
+  await expect(page.getByTestId("moves-counter")).toHaveText(/Moves\s*1 \/ 5/);
   await expect(page.getByTestId("undo-counter")).toHaveText(/Undo Left\s*5/);
 
   await page.getByRole("button", { name: "Undo" }).click();
   await expect(page.getByText("Undo applied! Keep sorting.")).toBeVisible();
-  await expect(page.getByTestId("moves-counter")).toHaveText(/Moves\s*0 \/ 8/);
+  await expect(page.getByTestId("moves-counter")).toHaveText(/Moves\s*0 \/ 5/);
   await expect(page.getByTestId("undo-counter")).toHaveText(/Undo Left\s*4/);
 
   await page.getByTestId("cup-0").click();
@@ -106,7 +103,7 @@ test("sort HUD tracks moves, undo, restart, and retries", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Restart" })).toBeEnabled();
   await page.getByRole("button", { name: "Restart" }).click();
 
-  await expect(page.getByTestId("moves-counter")).toHaveText(/Moves\s*0 \/ 8/);
+  await expect(page.getByTestId("moves-counter")).toHaveText(/Moves\s*0 \/ 5/);
   await expect(page.getByTestId("undo-counter")).toHaveText(/Undo Left\s*5/);
   await expect(page.getByTestId("restart-counter")).toHaveText(
     /Restart Left\s*0/,
@@ -114,6 +111,7 @@ test("sort HUD tracks moves, undo, restart, and retries", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Restart" })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Undo" })).toBeDisabled();
   await expect(page.getByTestId("cup-2")).toContainText("Empty");
+  await expect(page.getByTestId("cup-3")).toHaveCount(0);
   await expect(
     page.getByText("Tap a cup to select, then tap another to pour."),
   ).toBeVisible();
@@ -191,7 +189,7 @@ test("failed level locks board and Try Again resets same level with spent retry"
 
   await expect(failureDialog).toBeVisible();
   await expect(failureDialog).toContainText("2 retries left.");
-  await expect(page.getByTestId("moves-counter")).toHaveText(/Moves\s*8 \/ 8/);
+  await expect(page.getByTestId("moves-counter")).toHaveText(/Moves\s*5 \/ 5/);
   await expect(page.getByTestId("retry-counter")).toHaveText(
     /Retries Left\s*2/,
   );
@@ -207,7 +205,7 @@ test("failed level locks board and Try Again resets same level with spent retry"
   await page.getByRole("button", { name: "Retry" }).click();
 
   await expect(page.getByText("Cafe Level 1")).toBeVisible();
-  await expect(page.getByTestId("moves-counter")).toHaveText(/Moves\s*0 \/ 8/);
+  await expect(page.getByTestId("moves-counter")).toHaveText(/Moves\s*0 \/ 5/);
   await expect(page.getByTestId("undo-counter")).toHaveText(/Undo Left\s*5/);
   await expect(page.getByTestId("restart-counter")).toHaveText(
     /Restart Left\s*1/,
@@ -217,6 +215,7 @@ test("failed level locks board and Try Again resets same level with spent retry"
   );
   await expect(page.getByTestId("cup-0")).toBeEnabled();
   await expect(page.getByTestId("cup-2")).toContainText("Empty");
+  await expect(page.getByTestId("cup-3")).toHaveCount(0);
   await expect(
     page.getByText("Tap a cup to select, then tap another to pour."),
   ).toBeVisible();
@@ -257,12 +256,12 @@ test("third failed attempt refills retries and sends player back to level 1", as
 
   await expect(page.getByText("Cafe Level 1")).toBeVisible();
   await expect(page.getByText("Warm Up Matcha")).toBeVisible();
-  await expect(page.getByTestId("moves-counter")).toHaveText(/Moves\s*0 \/ 8/);
+  await expect(page.getByTestId("moves-counter")).toHaveText(/Moves\s*0 \/ 5/);
   await expect(page.getByTestId("retry-counter")).toHaveText(
     /Retries Left\s*3/,
   );
-  await expect(page.getByTestId("cup-3")).toContainText("Empty");
-  await expect(page.getByTestId("cup-4")).toHaveCount(0);
+  await expect(page.getByTestId("cup-2")).toContainText("Empty");
+  await expect(page.getByTestId("cup-3")).toHaveCount(0);
 });
 
 test.describe("mobile sort layout", () => {

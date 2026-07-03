@@ -13,11 +13,10 @@ export const LEVELS: LevelDefinition[] = [
     name: "Warm Up Matcha",
     recipe: "Matcha Silk Latte",
     description: "Simple sorting with 2 primary layers.",
-    moveLimit: 8,
+    moveLimit: 5,
     cups: [
       [COLORS.matcha, COLORS.milk, COLORS.matcha],
-      [COLORS.milk, COLORS.strawberry, COLORS.milk],
-      [],
+      [COLORS.milk, COLORS.matcha, COLORS.milk],
       [],
     ],
   },
