@@ -5,6 +5,8 @@ import {
   applyCaptureReward,
   applyFailurePenalty,
   loadProfile,
+  resetProfileProgressAfterRetryExhaustion,
+  restoreRetryBudget,
   saveProfile,
 } from "./profile";
 
@@ -54,13 +56,13 @@ describe("profile", () => {
     expect(storage.get("matchamatch.profile.v1")).toContain('"dailyScore":250');
   });
 
-  it("spends retry budget and resets progress on exhaustion", () => {
+  it("spends retry budget down to zero on exhaustion", () => {
     const nextProfile = applyFailurePenalty({
       ...DEFAULT_PROFILE,
       currentLevelIndex: 4,
       retryBudgetRemaining: 2,
     });
-    const resetProfile = applyFailurePenalty({
+    const exhaustedProfile = applyFailurePenalty({
       ...DEFAULT_PROFILE,
       currentLevelIndex: 4,
       retryBudgetRemaining: 1,
@@ -68,7 +70,29 @@ describe("profile", () => {
 
     expect(nextProfile.currentLevelIndex).toBe(4);
     expect(nextProfile.retryBudgetRemaining).toBe(1);
+    expect(exhaustedProfile.currentLevelIndex).toBe(4);
+    expect(exhaustedProfile.retryBudgetRemaining).toBe(0);
+  });
+
+  it("resets progress after retry exhaustion", () => {
+    const resetProfile = resetProfileProgressAfterRetryExhaustion({
+      ...DEFAULT_PROFILE,
+      currentLevelIndex: 4,
+      retryBudgetRemaining: 0,
+    });
+
     expect(resetProfile.currentLevelIndex).toBe(0);
     expect(resetProfile.retryBudgetRemaining).toBe(DEFAULT_RETRY_BUDGET);
+  });
+
+  it("restores single retry without exceeding budget", () => {
+    const rescuedProfile = restoreRetryBudget({
+      ...DEFAULT_PROFILE,
+      retryBudgetRemaining: 0,
+    });
+    const cappedProfile = restoreRetryBudget(DEFAULT_PROFILE);
+
+    expect(rescuedProfile.retryBudgetRemaining).toBe(1);
+    expect(cappedProfile.retryBudgetRemaining).toBe(DEFAULT_RETRY_BUDGET);
   });
 });

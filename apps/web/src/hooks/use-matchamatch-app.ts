@@ -13,7 +13,9 @@ import {
   canPour,
   createSortState,
   loadProfile,
+  resetProfileProgressAfterRetryExhaustion,
   restartSortState,
+  restoreRetryBudget,
   saveProfile,
   undoSortMove,
   type MatchaDetection,
@@ -57,6 +59,8 @@ export function useMatchamatchApp() {
     destinationIndex: null,
   });
   const [isAdvancingLevel, setIsAdvancingLevel] = useState(false);
+  const [pendingRetryRescueLevelIndex, setPendingRetryRescueLevelIndex] =
+    useState<number | null>(null);
   const levelAdvanceTimeoutRef = useRef<number | null>(null);
 
   function createLevelState(levelIndex: number) {
@@ -64,15 +68,21 @@ export function useMatchamatchApp() {
     return createSortState(level.cups, level.moveLimit);
   }
 
-  function getFailureMessage(
-    failedProfile: LocalProfile,
-    didResetToLevelOne: boolean,
-  ) {
-    if (didResetToLevelOne) {
-      return "Move limit reached! Retry budget refilled. Back to Cafe Level 1.";
+  function getFailureMessage(failedProfile: LocalProfile) {
+    if (failedProfile.retryBudgetRemaining === 0) {
+      return "Move limit reached! No retries left. Capture Matcha in Go for +1 retry, or go back to Cafe Level 1.";
     }
 
     return `Move limit reached! ${failedProfile.retryBudgetRemaining} retries left.`;
+  }
+
+  function createExhaustedRetryState(levelIndex: number) {
+    return {
+      ...createLevelState(levelIndex),
+      message:
+        "Move limit reached! No retries left. Capture Matcha in Go for +1 retry, or go back to Cafe Level 1.",
+      status: "failed" as const,
+    };
   }
 
   function emitSortFeedback(
@@ -136,9 +146,17 @@ export function useMatchamatchApp() {
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const nextProfile = loadProfile(window.localStorage);
+    const isRetryCaptureRequired = nextProfile.retryBudgetRemaining === 0;
     setProfile(nextProfile);
     setCurrentBoardLevelIndex(nextProfile.currentLevelIndex);
-    setSortState(createLevelState(nextProfile.currentLevelIndex));
+    setPendingRetryRescueLevelIndex(
+      isRetryCaptureRequired ? nextProfile.currentLevelIndex : null,
+    );
+    setSortState(
+      isRetryCaptureRequired
+        ? createExhaustedRetryState(nextProfile.currentLevelIndex)
+        : createLevelState(nextProfile.currentLevelIndex),
+    );
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
 
@@ -277,13 +295,16 @@ export function useMatchamatchApp() {
 
     if (nextState.status === "failed" && profile) {
       const nextProfile = applyFailurePenalty(profile);
-      const didResetToLevelOne = profile.retryBudgetRemaining === 1;
+      const didExhaustRetries = nextProfile.retryBudgetRemaining === 0;
 
       emitSortFeedback("success", sourceIndex, index);
       setProfile(nextProfile);
+      setPendingRetryRescueLevelIndex(
+        didExhaustRetries ? currentBoardLevelIndex : null,
+      );
       setSortState({
         ...nextState,
-        message: getFailureMessage(nextProfile, didResetToLevelOne),
+        message: getFailureMessage(nextProfile),
       });
       return;
     }
@@ -293,22 +314,55 @@ export function useMatchamatchApp() {
   }
 
   function tryAgain() {
-    if (!profile || !sortState || sortState.status !== "failed") {
+    if (
+      !profile ||
+      !sortState ||
+      sortState.status !== "failed" ||
+      profile.retryBudgetRemaining === 0
+    ) {
       return;
     }
 
+    setPendingRetryRescueLevelIndex(null);
     setCurrentBoardLevelIndex(profile.currentLevelIndex);
     resetSortFeedback();
     setSortState(createLevelState(profile.currentLevelIndex));
   }
 
-  function applyScannerResult(result: MatchaDetection) {
+  function openRetryCaptureFlow() {
+    setActiveTab("go");
+  }
+
+  function resetToLevelOne() {
     setProfile((current) => {
       if (!current) {
         return current;
       }
 
-      const nextProfile = applyCaptureReward(current, result.isMatcha);
+      const nextProfile = resetProfileProgressAfterRetryExhaustion(current);
+      saveProfile(window.localStorage, nextProfile);
+      return nextProfile;
+    });
+    setPendingRetryRescueLevelIndex(null);
+    setCurrentBoardLevelIndex(0);
+    resetSortFeedback();
+    setSortState(createLevelState(0));
+    setActiveTabState("sort");
+  }
+
+  function applyScannerResult(result: MatchaDetection) {
+    const retryRescueLevelIndex = pendingRetryRescueLevelIndex;
+
+    setProfile((current) => {
+      if (!current) {
+        return current;
+      }
+
+      const rewardedProfile = applyCaptureReward(current, result.isMatcha);
+      const nextProfile =
+        retryRescueLevelIndex === null
+          ? rewardedProfile
+          : restoreRetryBudget(rewardedProfile);
       const unlockedSkins = SKINS.filter(
         (skin) =>
           !current.unlockedSkins.includes(skin.id) &&
@@ -322,6 +376,10 @@ export function useMatchamatchApp() {
         ? "Real green Matcha segmented! Restored +100 Pts."
         : "Daily cup segment restored! +100 Pts.";
 
+      if (retryRescueLevelIndex !== null) {
+        alertMessage += " Retry +1 restored.";
+      }
+
       if (unlockedNames.length > 0) {
         alertMessage += ` Unlocked ${unlockedNames.join(" & ")} skin!`;
       }
@@ -333,6 +391,14 @@ export function useMatchamatchApp() {
       saveProfile(window.localStorage, nextProfile);
       return nextProfile;
     });
+
+    if (retryRescueLevelIndex !== null) {
+      setPendingRetryRescueLevelIndex(null);
+      setCurrentBoardLevelIndex(retryRescueLevelIndex);
+      resetSortFeedback();
+      setSortState(createLevelState(retryRescueLevelIndex));
+      setActiveTabState("sort");
+    }
   }
 
   return {
@@ -341,8 +407,11 @@ export function useMatchamatchApp() {
     applyScannerResult,
     currentBoardLevelIndex,
     onCupPress,
+    openRetryCaptureFlow,
+    pendingRetryRescueLevelIndex,
     profile,
     recentUnlockedSkinIds,
+    resetToLevelOne,
     restartLevel,
     scannerFeedbackKey,
     scannerFeedback,

@@ -15,8 +15,11 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
     applyScannerResult,
     currentBoardLevelIndex,
     onCupPress,
+    openRetryCaptureFlow,
+    pendingRetryRescueLevelIndex,
     profile,
     recentUnlockedSkinIds,
+    resetToLevelOne,
     restartLevel,
     scannerFeedbackKey,
     scannerFeedback,
@@ -93,9 +96,12 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
               activeLevel={activeLevel}
               activeLevelIndex={currentBoardLevelIndex}
               onCupPress={onCupPress}
+              onOpenRetryCapture={openRetryCaptureFlow}
               onRestart={restartLevel}
+              onResetToLevelOne={resetToLevelOne}
               onTryAgain={tryAgain}
               onUndo={undoMove}
+              pendingRetryRescueLevelIndex={pendingRetryRescueLevelIndex}
               profile={profile}
               scorePulseKey={scorePulseKey}
               sortState={sortState}

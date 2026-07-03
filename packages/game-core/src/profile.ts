@@ -90,17 +90,32 @@ export function applyLevelReward(profile: LocalProfile): LocalProfile {
 }
 
 export function applyFailurePenalty(profile: LocalProfile): LocalProfile {
-  if (profile.retryBudgetRemaining <= 1) {
-    return {
-      ...profile,
-      currentLevelIndex: 0,
-      retryBudgetRemaining: DEFAULT_RETRY_BUDGET,
-    };
-  }
-
   return {
     ...profile,
-    retryBudgetRemaining: profile.retryBudgetRemaining - 1,
+    retryBudgetRemaining: Math.max(profile.retryBudgetRemaining - 1, 0),
+  };
+}
+
+export function resetProfileProgressAfterRetryExhaustion(
+  profile: LocalProfile,
+): LocalProfile {
+  return {
+    ...profile,
+    currentLevelIndex: 0,
+    retryBudgetRemaining: DEFAULT_RETRY_BUDGET,
+  };
+}
+
+export function restoreRetryBudget(
+  profile: LocalProfile,
+  retryCount = 1,
+): LocalProfile {
+  return {
+    ...profile,
+    retryBudgetRemaining: Math.min(
+      profile.retryBudgetRemaining + retryCount,
+      DEFAULT_RETRY_BUDGET,
+    ),
   };
 }
 

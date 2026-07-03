@@ -14,9 +14,12 @@ export function SortBoard({
   activeLevel,
   activeLevelIndex,
   onCupPress,
+  onOpenRetryCapture,
   onRestart,
+  onResetToLevelOne,
   onTryAgain,
   onUndo,
+  pendingRetryRescueLevelIndex,
   profile,
   scorePulseKey,
   sortState,
@@ -25,15 +28,20 @@ export function SortBoard({
   activeLevel: LevelDefinition;
   activeLevelIndex: number;
   onCupPress: (index: number) => void;
+  onOpenRetryCapture: () => void;
   onRestart: () => void;
+  onResetToLevelOne: () => void;
   onTryAgain: () => void;
   onUndo: () => void;
+  pendingRetryRescueLevelIndex: number | null;
   profile: LocalProfile;
   scorePulseKey: number;
   sortState: SortState;
   sortFeedbackEvent: SortFeedbackEvent;
 }) {
   const showFailureModal = sortState.status === "failed";
+  const isRetryCaptureRequired =
+    pendingRetryRescueLevelIndex !== null && profile.retryBudgetRemaining === 0;
   const isInvalidMessage =
     sortFeedbackEvent.kind === "invalid" || sortFeedbackEvent.kind === "empty";
   const isSuccessMessage = sortFeedbackEvent.kind === "success";
@@ -237,15 +245,37 @@ export function SortBoard({
             >
               {failureMessage}
             </p>
-            <button
-              aria-label="Retry"
-              autoFocus
-              className="mm-button mt-5 w-full rounded-[16px] bg-[#7b8d5d] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(123,141,93,0.22)] sm:rounded-[18px] sm:py-3 sm:shadow-[0_16px_30px_rgba(123,141,93,0.22)]"
-              onClick={onTryAgain}
-              type="button"
-            >
-              Retry
-            </button>
+            {isRetryCaptureRequired ? (
+              <div className="mt-5 grid gap-2.5">
+                <button
+                  aria-label="Capture Matcha for +1 Retry"
+                  autoFocus
+                  className="mm-button w-full rounded-[16px] bg-[#7b8d5d] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(123,141,93,0.22)] sm:rounded-[18px] sm:py-3 sm:shadow-[0_16px_30px_rgba(123,141,93,0.22)]"
+                  onClick={onOpenRetryCapture}
+                  type="button"
+                >
+                  Capture Matcha for +1 Retry
+                </button>
+                <button
+                  aria-label="Back to Level 1"
+                  className="mm-button w-full rounded-[16px] border border-[#e7e3d8] bg-white px-4 py-2.5 text-sm font-semibold text-[#3A432E] shadow-[0_10px_20px_rgba(180,184,162,0.12)] sm:rounded-[18px] sm:py-3 sm:shadow-[0_12px_24px_rgba(180,184,162,0.12)]"
+                  onClick={onResetToLevelOne}
+                  type="button"
+                >
+                  Back to Level 1
+                </button>
+              </div>
+            ) : (
+              <button
+                aria-label="Retry"
+                autoFocus
+                className="mm-button mt-5 w-full rounded-[16px] bg-[#7b8d5d] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(123,141,93,0.22)] sm:rounded-[18px] sm:py-3 sm:shadow-[0_16px_30px_rgba(123,141,93,0.22)]"
+                onClick={onTryAgain}
+                type="button"
+              >
+                Retry
+              </button>
+            )}
           </div>
         </div>
       ) : null}

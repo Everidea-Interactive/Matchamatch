@@ -50,6 +50,52 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+async function mockCamera(page: Page) {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "mediaDevices", {
+      configurable: true,
+      value: {
+        getUserMedia: async () => {
+          const stream = new MediaStream();
+          const originalGetTracks = stream.getTracks.bind(stream);
+
+          stream.getTracks = () => {
+            const tracks = originalGetTracks();
+            return tracks.length > 0
+              ? tracks
+              : [
+                  {
+                    stop: () => undefined,
+                  } as MediaStreamTrack,
+                ];
+          };
+
+          return stream;
+        },
+      },
+    });
+
+    Object.defineProperty(HTMLMediaElement.prototype, "play", {
+      configurable: true,
+      value: async () => undefined,
+    });
+
+    Object.defineProperty(HTMLVideoElement.prototype, "videoWidth", {
+      configurable: true,
+      get() {
+        return 640;
+      },
+    });
+
+    Object.defineProperty(HTMLVideoElement.prototype, "videoHeight", {
+      configurable: true,
+      get() {
+        return 480;
+      },
+    });
+  });
+}
+
 async function playMoves(page: Page, moves: Array<[number, number]>) {
   for (const [sourceIndex, destinationIndex] of moves) {
     await page.getByTestId(`cup-${sourceIndex}`).click();
@@ -221,7 +267,7 @@ test("failed level locks board and Try Again resets same level with spent retry"
   ).toBeVisible();
 });
 
-test("third failed attempt refills retries and sends player back to level 1", async ({
+test("exhausted retries offer capture rescue and level 1 fallback", async ({
   page,
 }) => {
   await seedProfile(page, {
@@ -243,16 +289,22 @@ test("third failed attempt refills retries and sends player back to level 1", as
 
   await expect(failureDialog).toBeVisible();
   await expect(failureDialog).toContainText(
-    "Retry budget refilled. Back to Cafe Level 1.",
+    "No retries left. Capture Matcha in Go for +1 retry, or go back to Cafe Level 1.",
   );
   await expect(page.getByTestId("moves-counter")).toHaveText(
     /Moves\s*12 \/ 12/,
   );
   await expect(page.getByTestId("retry-counter")).toHaveText(
-    /Retries Left\s*3/,
+    /Retries Left\s*0/,
   );
+  await expect(
+    page.getByRole("button", { name: "Capture Matcha for +1 Retry" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Back to Level 1" }),
+  ).toBeVisible();
 
-  await page.getByRole("button", { name: "Retry" }).click();
+  await page.getByRole("button", { name: "Back to Level 1" }).click();
 
   await expect(page.getByText("Cafe Level 1")).toBeVisible();
   await expect(page.getByText("Warm Up Matcha")).toBeVisible();
@@ -262,6 +314,35 @@ test("third failed attempt refills retries and sends player back to level 1", as
   );
   await expect(page.getByTestId("cup-2")).toContainText("Empty");
   await expect(page.getByTestId("cup-3")).toHaveCount(0);
+});
+
+test("exhausted retries can be restored by Matcha capture", async ({
+  page,
+}) => {
+  await mockCamera(page);
+  await seedProfile(page, {
+    currentLevelIndex: 3,
+    retryBudgetRemaining: 1,
+  });
+  await page.goto("/");
+
+  await playMoves(page, LEVEL_FOUR_FAILURE_MOVES);
+  await page
+    .getByRole("button", { name: "Capture Matcha for +1 Retry" })
+    .click();
+
+  const captureButton = page.getByRole("button", { name: "Capture" });
+  await expect(captureButton).toBeEnabled();
+  await captureButton.click();
+
+  await expect(page.getByText("Cafe Level 4")).toBeVisible();
+  await expect(page.getByTestId("moves-counter")).toHaveText(/Moves\s*0 \/ 12/);
+  await expect(page.getByTestId("retry-counter")).toHaveText(
+    /Retries Left\s*1/,
+  );
+  await expect(
+    page.getByRole("dialog", { name: "Move limit reached" }),
+  ).toHaveCount(0);
 });
 
 test.describe("mobile sort layout", () => {
