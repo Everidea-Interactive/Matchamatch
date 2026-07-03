@@ -39,6 +39,28 @@ export interface SortFeedbackEvent {
   destinationIndex: number | null;
 }
 
+function createLevelState(levelIndex: number) {
+  const level = LEVELS[levelIndex] ?? LEVELS[0];
+  return createSortState(level.cups, level.moveLimit);
+}
+
+function getFailureMessage(failedProfile: LocalProfile) {
+  if (failedProfile.retryBudgetRemaining === 0) {
+    return "Move limit reached! No retries left. Capture Matcha in Go for +1 retry, or go back to Cafe Level 1.";
+  }
+
+  return `Move limit reached! ${failedProfile.retryBudgetRemaining} retries left.`;
+}
+
+function createExhaustedRetryState(levelIndex: number) {
+  return {
+    ...createLevelState(levelIndex),
+    message:
+      "Move limit reached! No retries left. Capture Matcha in Go for +1 retry, or go back to Cafe Level 1.",
+    status: "failed" as const,
+  };
+}
+
 export function useMatchamatchApp() {
   const [profile, setProfile] = useState<LocalProfile | null>(null);
   const [currentBoardLevelIndex, setCurrentBoardLevelIndex] = useState(0);
@@ -62,28 +84,6 @@ export function useMatchamatchApp() {
   const [pendingRetryRescueLevelIndex, setPendingRetryRescueLevelIndex] =
     useState<number | null>(null);
   const levelAdvanceTimeoutRef = useRef<number | null>(null);
-
-  function createLevelState(levelIndex: number) {
-    const level = LEVELS[levelIndex] ?? LEVELS[0];
-    return createSortState(level.cups, level.moveLimit);
-  }
-
-  function getFailureMessage(failedProfile: LocalProfile) {
-    if (failedProfile.retryBudgetRemaining === 0) {
-      return "Move limit reached! No retries left. Capture Matcha in Go for +1 retry, or go back to Cafe Level 1.";
-    }
-
-    return `Move limit reached! ${failedProfile.retryBudgetRemaining} retries left.`;
-  }
-
-  function createExhaustedRetryState(levelIndex: number) {
-    return {
-      ...createLevelState(levelIndex),
-      message:
-        "Move limit reached! No retries left. Capture Matcha in Go for +1 retry, or go back to Cafe Level 1.",
-      status: "failed" as const,
-    };
-  }
 
   function emitSortFeedback(
     kind: SortFeedbackKind,
