@@ -7,6 +7,23 @@
   --mm-duration-fast: 180ms;
   --mm-duration-base: 280ms;
   --mm-duration-slow: 460ms;
+  --mm-page-base: #e7dace;
+  --mm-page-mist: #f8f1e8;
+  --mm-shell-top: rgba(248, 241, 232, 0.82);
+  --mm-shell-bottom: rgba(236, 223, 208, 0.78);
+  --mm-card-top: rgba(252, 247, 239, 0.96);
+  --mm-card-bottom: rgba(243, 233, 220, 0.9);
+  --mm-surface-raised: rgba(255, 249, 241, 0.92);
+  --mm-surface-soft: rgba(249, 242, 233, 0.88);
+  --mm-sage: #b8c99d;
+  --mm-sage-deep: #8ca071;
+  --mm-sage-soft: #d8e4ca;
+  --mm-ink: #665444;
+  --mm-ink-strong: #4f3e31;
+  --mm-muted: #9a8675;
+  --mm-border: #ede2d5;
+  --mm-surface-border: rgba(235, 225, 212, 0.94);
+  --mm-shadow-rgb: 126, 108, 86;
 }
 
 @theme inline {
@@ -24,7 +41,8 @@ body {
   margin: 0;
   overflow-x: hidden;
   font-family: var(--font-quicksand), sans-serif;
-  background-color: #eef3e3;
+  color: var(--mm-ink);
+  background-color: var(--mm-page-base);
 }
 
 body::before,
@@ -58,8 +76,8 @@ body::before {
 body::after {
   z-index: -1;
   background:
-    radial-gradient(circle at top, rgba(252, 252, 248, 0.18), transparent 42%),
-    linear-gradient(180deg, rgba(238, 243, 227, 0.36) 0%, rgba(237, 242, 230, 0.28) 44%, rgba(239, 245, 235, 0.34) 100%);
+    radial-gradient(circle at top, rgba(255, 248, 240, 0.24), transparent 42%),
+    linear-gradient(180deg, rgba(244, 236, 226, 0.4) 0%, rgba(239, 229, 216, 0.28) 44%, rgba(244, 236, 226, 0.34) 100%);
 }
 
 * {
@@ -200,14 +218,14 @@ body::after {
 
 .mm-cup-frame-stroke {
   fill: none;
-  stroke: #564637;
+  stroke: #655241;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 7px;
 }
 
 .mm-cup-empty-label {
-  fill: #b0af98;
+  fill: #b6a28f;
   font-size: 23px;
   font-weight: 600;
   letter-spacing: 0.32em;

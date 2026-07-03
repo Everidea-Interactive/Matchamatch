@@ -59,7 +59,7 @@ export function SortBoard({
 
   return (
     <section
-      className="mm-card-sheen relative overflow-hidden rounded-[30px] bg-[linear-gradient(180deg,rgba(252,252,248,0.98),rgba(242,247,235,0.92))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.88)] sm:rounded-[34px] sm:p-6"
+      className="mm-card-sheen relative overflow-hidden rounded-[30px] border border-white/72 bg-[linear-gradient(180deg,var(--mm-card-top),var(--mm-card-bottom))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_18px_40px_rgba(var(--mm-shadow-rgb),0.1)] sm:rounded-[34px] sm:p-6"
       style={boardStyle}
     >
       <div
@@ -73,21 +73,21 @@ export function SortBoard({
         <header className="mb-4 sm:mb-6">
           <div className="flex items-start justify-between gap-3 sm:gap-4">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[#9A9A80]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--mm-muted)]">
                 Cafe Level {activeLevelIndex + 1}
               </p>
-              <h1 className="mt-2 max-w-[9ch] text-[1.9rem] leading-[0.98] font-bold tracking-[-0.05em] text-[#343328] sm:mt-3 sm:text-[2.35rem]">
+              <h1 className="mt-2 max-w-[9ch] text-[1.9rem] leading-[0.98] font-bold tracking-[-0.05em] text-[var(--mm-ink-strong)] sm:mt-3 sm:text-[2.35rem]">
                 {activeLevel.name}
               </h1>
             </div>
             <div className="flex flex-col items-end gap-2 sm:gap-3">
-              <div className="rounded-[20px] bg-white/88 px-4 py-3 text-center shadow-[0_12px_24px_rgba(144,149,120,0.14)] transition-transform duration-300 ease-[var(--mm-ease-spring)] hover:-translate-y-0.5 sm:rounded-[24px] sm:px-5 sm:py-4 sm:shadow-[0_16px_30px_rgba(144,149,120,0.14)]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#A0A184]">
+              <div className="rounded-[20px] border border-[rgba(223,208,191,0.96)] bg-[linear-gradient(180deg,rgba(236,223,208,0.98),rgba(223,208,191,0.96))] px-4 py-3 text-center shadow-[0_12px_24px_rgba(154,133,110,0.16)] transition-transform duration-300 ease-[var(--mm-ease-spring)] hover:-translate-y-0.5 sm:rounded-[24px] sm:px-5 sm:py-4 sm:shadow-[0_16px_30px_rgba(154,133,110,0.18)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#8f7966]">
                   Daily Score
                 </p>
                 <p
                   key={`score-${scorePulseKey}`}
-                  className={`mt-1 text-[1.8rem] leading-none font-bold text-[#343328] sm:text-[2rem] ${
+                  className={`mt-1 text-[1.8rem] leading-none font-bold text-[#5b4736] sm:text-[2rem] ${
                     scorePulseKey > 0 ? "mm-score-pop" : ""
                   }`}
                 >
@@ -96,11 +96,11 @@ export function SortBoard({
               </div>
             </div>
           </div>
-          <div className="mt-3 flex items-center justify-between gap-3 text-[#66664F] sm:mt-4">
+          <div className="mt-3 flex items-center justify-between gap-3 text-[var(--mm-ink)] sm:mt-4">
             <div data-testid="moves-counter">
               <p className="text-[0.98rem] font-medium sm:text-[1.05rem]">
                 Moves{" "}
-                <span className="font-semibold text-[#2E3625]">
+                <span className="font-semibold text-[var(--mm-ink-strong)]">
                   {sortState.movesUsed} / {sortState.moveLimit}
                 </span>
               </p>
@@ -181,10 +181,10 @@ export function SortBoard({
           key={`message-${sortFeedbackEvent.id}`}
           className={`mm-feedback-in mt-3 min-h-5 text-[13px] font-medium sm:mt-5 sm:min-h-6 sm:text-sm ${
             isInvalidMessage
-              ? "text-[#815E4A]"
+              ? "text-[#8B6753]"
               : isSuccessMessage
-                ? "text-[#44603E]"
-                : "text-[#4C5A3F]"
+                ? "text-[var(--mm-sage-deep)]"
+                : "text-[var(--mm-ink)]"
           }`}
         >
           {showFailureModal ? "" : sortState.message}
@@ -198,7 +198,7 @@ export function SortBoard({
         <div className="mt-3 grid grid-cols-2 gap-2.5 sm:mt-5 sm:gap-3">
           <button
             aria-label="Undo"
-            className="mm-button rounded-[16px] bg-[#7b8d5d] px-4 py-2.5 text-sm font-semibold text-[#fffdf6] shadow-[0_12px_24px_rgba(123,141,93,0.22)] disabled:cursor-not-allowed disabled:opacity-45 sm:rounded-[18px] sm:py-3 sm:shadow-[0_16px_30px_rgba(123,141,93,0.22)]"
+            className="mm-button rounded-[16px] bg-[linear-gradient(180deg,var(--mm-sage),var(--mm-sage-deep))] px-4 py-2.5 text-sm font-semibold text-[#fffdf6] shadow-[0_12px_24px_rgba(123,141,93,0.22)] disabled:cursor-not-allowed disabled:opacity-45 sm:rounded-[18px] sm:py-3 sm:shadow-[0_16px_30px_rgba(123,141,93,0.22)]"
             disabled={
               areBoardActionsLocked ||
               sortState.history.length === 0 ||
@@ -211,7 +211,7 @@ export function SortBoard({
           </button>
           <button
             aria-label="Restart"
-            className="mm-button rounded-[16px] border border-[#e7e3d8] bg-white px-4 py-2.5 text-sm font-semibold text-[#3A432E] shadow-[0_10px_20px_rgba(180,184,162,0.12)] disabled:cursor-not-allowed disabled:opacity-45 sm:rounded-[18px] sm:py-3 sm:shadow-[0_12px_24px_rgba(180,184,162,0.12)]"
+            className="mm-button rounded-[16px] border border-[var(--mm-border)] bg-[var(--mm-surface-raised)] px-4 py-2.5 text-sm font-semibold text-[var(--mm-ink-strong)] shadow-[0_10px_20px_rgba(var(--mm-shadow-rgb),0.08)] disabled:cursor-not-allowed disabled:opacity-45 sm:rounded-[18px] sm:py-3 sm:shadow-[0_12px_24px_rgba(var(--mm-shadow-rgb),0.1)]"
             disabled={areBoardActionsLocked || sortState.restartRemaining === 0}
             onClick={onRestart}
             type="button"
@@ -222,25 +222,25 @@ export function SortBoard({
       </div>
 
       {showFailureModal ? (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.7),rgba(232,238,220,0.94))] px-4 py-5 sm:px-5 sm:py-6">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(255,250,244,0.76),rgba(239,228,214,0.94))] px-4 py-5 sm:px-5 sm:py-6">
           <div
             aria-describedby="sort-failure-description"
             aria-labelledby="sort-failure-title"
             aria-modal="true"
-            className="mm-card-sheen w-full max-w-[22rem] rounded-[28px] border border-white/70 bg-[linear-gradient(180deg,rgba(252,252,248,0.99),rgba(242,247,235,0.97))] p-5 text-center shadow-[0_20px_48px_rgba(126,138,101,0.24)] sm:rounded-[30px] sm:p-6 sm:shadow-[0_24px_60px_rgba(126,138,101,0.24)]"
+            className="mm-card-sheen w-full max-w-[22rem] rounded-[28px] border border-white/70 bg-[linear-gradient(180deg,var(--mm-card-top),var(--mm-card-bottom))] p-5 text-center shadow-[0_20px_48px_rgba(var(--mm-shadow-rgb),0.14)] sm:rounded-[30px] sm:p-6 sm:shadow-[0_24px_60px_rgba(var(--mm-shadow-rgb),0.16)]"
             role="dialog"
           >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#9A9A80]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--mm-muted)]">
               Level Failed
             </p>
             <h2
-              className="mt-3 text-[1.65rem] leading-[1.02] font-bold tracking-[-0.05em] text-[#343328] sm:text-[1.85rem]"
+              className="mt-3 text-[1.65rem] leading-[1.02] font-bold tracking-[-0.05em] text-[var(--mm-ink-strong)] sm:text-[1.85rem]"
               id="sort-failure-title"
             >
               Move limit reached
             </h2>
             <p
-              className="mt-3 text-sm font-medium leading-6 text-[#66664F]"
+              className="mt-3 text-sm font-medium leading-6 text-[var(--mm-ink)]"
               id="sort-failure-description"
             >
               {failureMessage}
@@ -250,7 +250,7 @@ export function SortBoard({
                 <button
                   aria-label="Capture Matcha for +1 Retry"
                   autoFocus
-                  className="mm-button w-full rounded-[16px] bg-[#7b8d5d] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(123,141,93,0.22)] sm:rounded-[18px] sm:py-3 sm:shadow-[0_16px_30px_rgba(123,141,93,0.22)]"
+                  className="mm-button w-full rounded-[16px] bg-[linear-gradient(180deg,var(--mm-sage),var(--mm-sage-deep))] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(123,141,93,0.22)] sm:rounded-[18px] sm:py-3 sm:shadow-[0_16px_30px_rgba(123,141,93,0.22)]"
                   onClick={onOpenRetryCapture}
                   type="button"
                 >
@@ -258,7 +258,7 @@ export function SortBoard({
                 </button>
                 <button
                   aria-label="Back to Level 1"
-                  className="mm-button w-full rounded-[16px] border border-[#e7e3d8] bg-white px-4 py-2.5 text-sm font-semibold text-[#3A432E] shadow-[0_10px_20px_rgba(180,184,162,0.12)] sm:rounded-[18px] sm:py-3 sm:shadow-[0_12px_24px_rgba(180,184,162,0.12)]"
+                  className="mm-button w-full rounded-[16px] border border-[var(--mm-border)] bg-[var(--mm-surface-raised)] px-4 py-2.5 text-sm font-semibold text-[var(--mm-ink-strong)] shadow-[0_10px_20px_rgba(var(--mm-shadow-rgb),0.08)] sm:rounded-[18px] sm:py-3 sm:shadow-[0_12px_24px_rgba(var(--mm-shadow-rgb),0.1)]"
                   onClick={onResetToLevelOne}
                   type="button"
                 >
@@ -269,7 +269,7 @@ export function SortBoard({
               <button
                 aria-label="Retry"
                 autoFocus
-                className="mm-button mt-5 w-full rounded-[16px] bg-[#7b8d5d] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(123,141,93,0.22)] sm:rounded-[18px] sm:py-3 sm:shadow-[0_16px_30px_rgba(123,141,93,0.22)]"
+                className="mm-button mt-5 w-full rounded-[16px] bg-[linear-gradient(180deg,var(--mm-sage),var(--mm-sage-deep))] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(123,141,93,0.22)] sm:rounded-[18px] sm:py-3 sm:shadow-[0_16px_30px_rgba(123,141,93,0.22)]"
                 onClick={onTryAgain}
                 type="button"
               >

@@ -62,7 +62,9 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
   if (!activeLevel || !profile || !sortState) {
     return (
       <main className="flex min-h-[100svh] items-center justify-center px-4 py-8 sm:min-h-screen">
-        <p className="text-base font-medium text-[#546149]">Loading...</p>
+        <p className="text-base font-medium text-[var(--mm-sage-deep)]">
+          Loading...
+        </p>
       </main>
     );
   }
@@ -79,8 +81,8 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
           ? "mx-auto w-full max-w-md p-3 sm:p-4"
           : "mx-auto min-h-[100svh] w-full max-w-md px-2 py-2 sm:min-h-screen sm:px-4 sm:py-6"
       }
-      >
-      <div className="mm-shell-in rounded-[30px] border border-white/60 bg-[linear-gradient(180deg,rgba(250,251,243,0.78),rgba(235,243,225,0.72))] p-2.5 shadow-[0_22px_56px_rgba(158,166,132,0.18)] backdrop-blur-sm sm:rounded-[36px] sm:p-4 sm:shadow-[0_28px_80px_rgba(158,166,132,0.18)]">
+    >
+      <div className="mm-shell-in rounded-[30px] border border-[var(--mm-border)] bg-[linear-gradient(180deg,var(--mm-shell-top),var(--mm-shell-bottom))] p-2.5 shadow-[0_20px_48px_rgba(var(--mm-shadow-rgb),0.08)] backdrop-blur-sm sm:rounded-[36px] sm:p-4 sm:shadow-[0_24px_64px_rgba(var(--mm-shadow-rgb),0.1)]">
         <TopNav activeTab={activeTab} onTabChange={setActiveTab} />
         <div className="grid" data-testid="tab-panel">
           <div
@@ -119,11 +121,11 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
               <ScannerPanel onResult={applyScannerResult} />
               <div
                 key={`scanner-feedback-${scannerFeedbackKey}`}
-                className={`rounded-[24px] bg-white/70 p-4 shadow-sm ${
+                className={`rounded-[24px] border border-[var(--mm-border)] bg-[var(--mm-surface-soft)] p-4 shadow-[0_12px_30px_rgba(var(--mm-shadow-rgb),0.08)] ${
                   scannerFeedbackKey > 0 ? "mm-feedback-in" : ""
                 }`}
               >
-                <p className="text-sm font-medium text-[#4C5A3F]">
+                <p className="text-sm font-medium text-[var(--mm-ink)]">
                   {scannerFeedback}
                 </p>
               </div>
@@ -137,14 +139,14 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
                   return (
                     <article
                       key={skin.id}
-                      className={`rounded-2xl bg-white/70 p-3 text-center shadow-sm transition-transform duration-300 ease-[var(--mm-ease-spring)] hover:-translate-y-0.5 ${
+                      className={`rounded-2xl border border-[var(--mm-border)] bg-[var(--mm-surface-soft)] p-3 text-center shadow-[0_12px_28px_rgba(var(--mm-shadow-rgb),0.08)] transition-transform duration-300 ease-[var(--mm-ease-spring)] hover:-translate-y-0.5 ${
                         isRecentlyUnlocked ? "mm-unlock-pop" : ""
                       }`}
                     >
                       <div className={`text-2xl ${isRecentlyUnlocked ? "mm-score-pop" : ""}`}>
                         {isUnlocked ? skin.emoji : "🔒"}
                       </div>
-                      <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.2em] text-[#3A432E]">
+                      <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--mm-ink-strong)]">
                         {skin.name}
                       </p>
                     </article>
