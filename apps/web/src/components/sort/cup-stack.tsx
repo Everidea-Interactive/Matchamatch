@@ -4,7 +4,6 @@ export function CupStack({
   cup,
   feedbackId,
   index,
-  isCandidateTarget,
   isDeselecting,
   isDisabled,
   isEmptyTap,
@@ -18,7 +17,6 @@ export function CupStack({
   cup: string[];
   feedbackId: number;
   index: number;
-  isCandidateTarget: boolean;
   isDeselecting: boolean;
   isDisabled: boolean;
   isEmptyTap: boolean;
@@ -32,7 +30,6 @@ export function CupStack({
   const shouldShake = isEmptyTap || isInvalidTarget;
   const shouldPulse = isSelectionPulse || isDeselecting;
   const animationClassName = [
-    isCandidateTarget ? "mm-cup-candidate" : "",
     shouldShake ? "mm-cup-shake" : "",
     shouldPulse ? "mm-cup-select-pop" : "",
     isPourSource ? "mm-cup-pour-source" : "",
@@ -55,10 +52,6 @@ export function CupStack({
       onClick={onPress}
       type="button"
     >
-      <span
-        aria-hidden="true"
-        className="mm-cup-sheen pointer-events-none absolute inset-0 opacity-0"
-      />
       {isPourSource ? (
         <span
           key={`source-wave-${feedbackId}`}

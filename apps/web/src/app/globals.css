@@ -137,26 +137,6 @@ body::after {
   will-change: transform;
 }
 
-.mm-cup-sheen {
-  background: linear-gradient(
-    120deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.16) 45%,
-    transparent 85%
-  );
-  transform: translateX(-130%) skewX(-18deg);
-}
-
-.mm-cup-candidate {
-  border-color: rgba(118, 137, 92, 0.45);
-  box-shadow: 0 18px 38px rgba(58, 67, 46, 0.14);
-}
-
-.mm-cup-candidate .mm-cup-sheen {
-  opacity: 1;
-  animation: mm-candidate-sheen 1.9s linear infinite;
-}
-
 .mm-cup-select-pop {
   animation: mm-cup-select-pop 420ms var(--mm-ease-spring) both;
 }
@@ -272,16 +252,6 @@ body::after {
   100% {
     transform: translateY(0) scale(1);
     box-shadow: 0 0 0 rgba(255, 255, 255, 0);
-  }
-}
-
-@keyframes mm-candidate-sheen {
-  0% {
-    transform: translateX(-130%) skewX(-18deg);
-  }
-
-  100% {
-    transform: translateX(130%) skewX(-18deg);
   }
 }
 

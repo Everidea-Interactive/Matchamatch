@@ -3,9 +3,8 @@ import type {
   LocalProfile,
   SortState,
 } from "@matchamatch/game-core";
-import { canPour } from "@matchamatch/game-core";
 import Image from "next/image";
-import { type CSSProperties, useMemo } from "react";
+import { type CSSProperties } from "react";
 import type { SortFeedbackEvent } from "@/hooks/use-matchamatch-app";
 import { CupStack } from "./cup-stack";
 
@@ -35,20 +34,6 @@ export function SortBoard({
   sortFeedbackEvent: SortFeedbackEvent;
 }) {
   const showFailureModal = sortState.status === "failed";
-  const candidateTargets = useMemo(() => {
-    const selectedCupIndex = sortState.selectedCupIndex;
-
-    if (selectedCupIndex === null) {
-      return new Set<number>();
-    }
-
-    return new Set(
-      sortState.cups
-        .map((_, index) => index)
-        .filter((index) => canPour(sortState.cups, selectedCupIndex, index)),
-    );
-  }, [sortState.cups, sortState.selectedCupIndex]);
-
   const isInvalidMessage =
     sortFeedbackEvent.kind === "invalid" || sortFeedbackEvent.kind === "empty";
   const isSuccessMessage = sortFeedbackEvent.kind === "success";
@@ -153,7 +138,6 @@ export function SortBoard({
               cup={cup}
               feedbackId={sortFeedbackEvent.id}
               index={index}
-              isCandidateTarget={candidateTargets.has(index)}
               isDeselecting={
                 sortFeedbackEvent.kind === "deselect" &&
                 sortFeedbackEvent.sourceIndex === index
