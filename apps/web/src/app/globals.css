@@ -149,20 +149,9 @@ body::after {
   transform-origin: center bottom;
   transition:
     transform var(--mm-duration-base) var(--mm-ease-out),
-    box-shadow var(--mm-duration-base) var(--mm-ease-out),
     border-color var(--mm-duration-fast) var(--mm-ease-out),
     background-color var(--mm-duration-fast) var(--mm-ease-out);
   will-change: transform;
-}
-
-.mm-cup[data-selected="true"] {
-  filter: drop-shadow(0 0 14px rgba(198, 214, 164, 0.72));
-}
-
-.mm-cup:focus-visible {
-  filter:
-    drop-shadow(0 0 0 rgba(0, 0, 0, 0))
-    drop-shadow(0 0 14px rgba(198, 214, 164, 0.72));
 }
 
 .mm-cup-select-pop {
@@ -179,6 +168,11 @@ body::after {
 
 .mm-cup-pour-destination {
   animation: mm-cup-pour-destination 520ms var(--mm-ease-spring) both;
+}
+
+.mm-cup-body-shadow {
+  fill: rgba(255, 255, 255, 0.01);
+  filter: drop-shadow(0 18px 20px rgba(177, 182, 151, 0.16));
 }
 
 .mm-cup-selection-glow {

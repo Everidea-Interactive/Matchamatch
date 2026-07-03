@@ -66,8 +66,8 @@ export function CupStack({
       data-selected={isSelected ? "true" : "false"}
       className={
         isSelected
-          ? `mm-cup ${animationClassName} block h-[var(--mm-cup-height)] w-full rounded-[30px] bg-transparent p-0 shadow-[0_18px_28px_rgba(177,182,151,0.18)] focus-visible:outline-none sm:shadow-[0_22px_36px_rgba(177,182,151,0.18)]`
-          : `mm-cup ${animationClassName} block h-[var(--mm-cup-height)] w-full rounded-[30px] bg-transparent p-0 shadow-[0_14px_24px_rgba(177,182,151,0.13)] hover:-translate-y-0.5 hover:shadow-[0_18px_28px_rgba(177,182,151,0.18)] focus-visible:outline-none sm:shadow-[0_18px_32px_rgba(177,182,151,0.13)] sm:hover:shadow-[0_22px_36px_rgba(177,182,151,0.18)]`
+          ? `mm-cup ${animationClassName} block h-[var(--mm-cup-height)] w-full rounded-[30px] bg-transparent p-0 focus-visible:outline-none`
+          : `mm-cup ${animationClassName} block h-[var(--mm-cup-height)] w-full rounded-[30px] bg-transparent p-0 hover:-translate-y-0.5 focus-visible:outline-none`
       }
       data-testid={`cup-${index}`}
       disabled={isDisabled}
@@ -144,6 +144,7 @@ export function CupStack({
           </linearGradient>
         </defs>
 
+        <path className="mm-cup-body-shadow" d={CUP_OUTER_PATH_CLOSED} />
         {isSelected ? (
           <path className="mm-cup-selection-glow" d={CUP_OUTER_PATH} />
         ) : null}
