@@ -7,7 +7,7 @@ test("first visit opens welcome modal and advances into tutorial", async ({
   await page.goto("/");
 
   await expect(
-    page.getByRole("dialog", { name: "Welcome to Matchamatch" }),
+    page.getByRole("dialog", { name: "Welcome to Matcha Match" }),
   ).toBeVisible();
 
   await page.getByRole("button", { name: "Show me how" }).click();
@@ -56,7 +56,7 @@ test("first visit opens welcome modal and advances into tutorial", async ({
   await tutorialDialog.getByRole("button", { name: /^Back$/ }).click();
 
   await expect(
-    page.getByRole("dialog", { name: "Welcome to Matchamatch" }),
+    page.getByRole("dialog", { name: "Welcome to Matcha Match" }),
   ).toBeVisible();
 });
 

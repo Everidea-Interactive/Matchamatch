@@ -139,9 +139,7 @@ export function TopNav({
         onClick={onOpenHelp}
         type="button"
       >
-        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[linear-gradient(180deg,var(--mm-sage-soft),var(--mm-sage))] text-[11px] font-bold text-[var(--mm-ink-strong)] sm:h-6 sm:w-6">
-          ?
-        </span>
+        ?
       </button>
     </div>
   );

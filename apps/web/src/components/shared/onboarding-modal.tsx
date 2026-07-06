@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 
 export type OnboardingStep = "welcome" | "tutorial";
@@ -158,12 +159,12 @@ export function OnboardingModal({
     : "onboarding-tutorial-description";
 
   return (
-    <div className="mm-modal-overlay-in fixed inset-0 z-50 flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(255,250,244,0.76),rgba(239,228,214,0.94))] px-4 py-5 sm:px-5 sm:py-6">
+    <div className="mm-modal-overlay-in absolute inset-0 z-50 flex items-center justify-center rounded-[30px] bg-[radial-gradient(circle_at_top,rgba(255,250,244,0.8),rgba(239,228,214,0.94))] px-4 py-5 backdrop-blur-[2px] sm:rounded-[36px] sm:px-5 sm:py-6">
       <div
         aria-describedby={descriptionId}
         aria-labelledby={titleId}
         aria-modal="true"
-        className="mm-card-sheen mm-modal-in relative w-full max-w-[24rem] overflow-hidden rounded-[30px] border border-white/70 bg-[linear-gradient(180deg,var(--mm-card-top),var(--mm-card-bottom))] p-5 shadow-[0_20px_48px_rgba(var(--mm-shadow-rgb),0.14)] sm:max-w-[25.5rem] sm:p-6 sm:shadow-[0_24px_60px_rgba(var(--mm-shadow-rgb),0.16)]"
+        className="mm-card-sheen mm-modal-in relative w-full max-w-[24rem] overflow-hidden rounded-[30px] border border-white/70 bg-[linear-gradient(180deg,var(--mm-card-top),var(--mm-card-bottom))] px-5 py-6 shadow-[0_20px_48px_rgba(var(--mm-shadow-rgb),0.14)] sm:max-w-[25.5rem] sm:px-6 sm:py-7 sm:shadow-[0_24px_60px_rgba(var(--mm-shadow-rgb),0.16)]"
         role="dialog"
       >
         <button
@@ -176,24 +177,30 @@ export function OnboardingModal({
         </button>
 
         {isWelcomeStep ? (
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--mm-muted)]">
-              Welcome
-            </p>
-            <h2
-              className="mt-3 max-w-[10ch] text-[2rem] leading-[0.94] font-bold tracking-[-0.05em] text-[var(--mm-ink-strong)] sm:text-[2.2rem]"
-              id={titleId}
-            >
-              Welcome to Matchamatch
-            </h2>
+          <div className="flex flex-col items-center text-center">
+            <Image
+              alt=""
+              aria-hidden="true"
+              className="h-auto w-[12.75rem] sm:w-[13.75rem]"
+              height={175}
+              priority
+              src="/icons/Logo.svg"
+              unoptimized
+              width={208}
+            />
             <p
-              className="mt-3 max-w-[30ch] text-sm font-medium leading-6 text-[var(--mm-ink)]"
-              id={descriptionId}
+              className="mt-4 max-w-[30ch] text-sm leading-6"
             >
-              Calm cafe puzzler. Sort tea layers, hop into scanner, earn points, then
-              rescue retries when cup run goes dry.
+              <span className="font-semibold text-[var(--mm-ink-strong)]" id={titleId}>
+                Welcome to Matcha Match!
+              </span>
+              <br />
+              <span className="text-[var(--mm-ink)]" id={descriptionId}>
+                Calm cafe puzzler. Sort tea layers, hop into scanner, earn points, then
+                rescue retries when cup run goes dry.
+              </span>
             </p>
-            <div className="mt-5 rounded-[24px] border border-[rgba(226,214,199,0.94)] bg-[rgba(255,249,241,0.74)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
+            <div className="mt-5 w-full rounded-[24px] border border-[rgba(226,214,199,0.94)] bg-[rgba(255,249,241,0.74)] p-4 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--mm-sage-deep)]">
                 First sip
               </p>
@@ -204,7 +211,7 @@ export function OnboardingModal({
                 scanner rewards.
               </p>
             </div>
-            <div className="mt-5 grid gap-2.5">
+            <div className="mt-5 grid w-full gap-2.5">
               <button
                 autoFocus
                 className="mm-button w-full rounded-[16px] bg-[linear-gradient(180deg,var(--mm-sage),var(--mm-sage-deep))] px-4 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(123,141,93,0.22)] sm:rounded-[18px] sm:shadow-[0_16px_30px_rgba(123,141,93,0.22)]"

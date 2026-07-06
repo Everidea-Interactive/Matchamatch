@@ -149,7 +149,7 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
           : "mx-auto min-h-[100svh] w-full max-w-md px-2 py-2 sm:min-h-screen sm:px-4 sm:py-6"
       }
     >
-      <div className="mm-shell-in rounded-[30px] border border-[var(--mm-border)] bg-[linear-gradient(180deg,var(--mm-shell-top),var(--mm-shell-bottom))] p-2.5 shadow-[0_20px_48px_rgba(var(--mm-shadow-rgb),0.08)] backdrop-blur-sm sm:rounded-[36px] sm:p-4 sm:shadow-[0_24px_64px_rgba(var(--mm-shadow-rgb),0.1)]">
+      <div className="mm-shell-in relative overflow-hidden rounded-[30px] border border-[var(--mm-border)] bg-[linear-gradient(180deg,var(--mm-shell-top),var(--mm-shell-bottom))] p-2.5 shadow-[0_20px_48px_rgba(var(--mm-shadow-rgb),0.08)] backdrop-blur-sm sm:rounded-[36px] sm:p-4 sm:shadow-[0_24px_64px_rgba(var(--mm-shadow-rgb),0.1)]">
         <div
           aria-hidden={isOnboardingOpen}
           inert={isOnboardingOpen ? true : undefined}
