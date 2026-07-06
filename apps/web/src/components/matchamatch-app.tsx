@@ -155,6 +155,11 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
         >
           <TopNav
             activeTab={activeTab}
+            leftAction={{
+              ariaLabel: "Open account",
+              href: "/account",
+              icon: "account",
+            }}
             onOpenHelp={openTutorial}
             onTabChange={setActiveTab}
           />

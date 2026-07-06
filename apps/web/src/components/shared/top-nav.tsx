@@ -1,14 +1,105 @@
+import Link from "next/link";
+
+type TopNavActionIcon = "account" | "home";
+
+type TopNavAction = {
+  ariaLabel: string;
+  href?: string;
+  icon: TopNavActionIcon;
+  onClick?: () => void;
+};
+
+function TopNavActionGlyph({ icon }: { icon: TopNavActionIcon }) {
+  if (icon === "home") {
+    return (
+      <svg
+        aria-hidden="true"
+        className="h-4 w-4 sm:h-[18px] sm:w-[18px]"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M4.75 10.75 12 5l7.25 5.75v7a1.5 1.5 0 0 1-1.5 1.5H6.25a1.5 1.5 0 0 1-1.5-1.5v-7Z"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="1.7"
+        />
+        <path
+          d="M9.25 19.25v-5.5h5.5v5.5"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="1.7"
+        />
+      </svg>
+    );
+  }
+
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-4 w-4 sm:h-[18px] sm:w-[18px]"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M12 12.25a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
+      <path
+        d="M5.25 19.25a6.75 6.75 0 0 1 13.5 0"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.7"
+      />
+    </svg>
+  );
+}
+
+function TopNavActionButton({ action }: { action: TopNavAction }) {
+  const className =
+    "mm-button flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[var(--mm-border)] bg-[rgba(255,249,241,0.9)] text-[var(--mm-ink-strong)] shadow-[0_10px_24px_rgba(var(--mm-shadow-rgb),0.08)] sm:h-12 sm:w-12 sm:rounded-[24px]";
+
+  if (action.href) {
+    return (
+      <Link aria-label={action.ariaLabel} className={className} href={action.href}>
+        <TopNavActionGlyph icon={action.icon} />
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      aria-label={action.ariaLabel}
+      className={className}
+      onClick={action.onClick}
+      type="button"
+    >
+      <TopNavActionGlyph icon={action.icon} />
+    </button>
+  );
+}
+
 export function TopNav({
   activeTab,
+  leftAction,
   onOpenHelp,
   onTabChange,
 }: {
   activeTab: "sort" | "go";
+  leftAction?: TopNavAction;
   onOpenHelp: () => void;
   onTabChange: (tab: "sort" | "go") => void;
 }) {
   return (
     <div className="mb-3 flex items-center gap-2 sm:mb-5 sm:gap-3">
+      {leftAction ? (
+        <TopNavActionButton action={leftAction} />
+      ) : (
+        <div aria-hidden="true" className="h-10 w-10 shrink-0 sm:h-12 sm:w-12" />
+      )}
       <div className="relative grid flex-1 grid-cols-2 rounded-[24px] border border-[var(--mm-border)] bg-[rgba(250,244,236,0.84)] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.82),0_10px_24px_rgba(var(--mm-shadow-rgb),0.08)] sm:rounded-[28px] sm:p-1.5">
         <span
           aria-hidden="true"
