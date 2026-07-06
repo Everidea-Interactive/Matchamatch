@@ -6,6 +6,9 @@ test("embed route sends ready and progress messages to host", async ({
   await page.goto("/embed-host.html");
   const frame = page.frameLocator("iframe");
 
+  await expect(
+    frame.getByRole("dialog", { name: "Welcome to Matchamatch" }),
+  ).toBeVisible();
   await expect(frame.getByText("Warm Up Matcha")).toBeVisible();
   await expect(page.getByTestId("host-log")).toContainText("matchamatch:ready");
 });

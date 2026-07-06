@@ -114,6 +114,14 @@ body::after {
   animation: mm-panel-in 340ms var(--mm-ease-spring) both;
 }
 
+.mm-modal-overlay-in {
+  animation: mm-modal-overlay-in 220ms var(--mm-ease-out) both;
+}
+
+.mm-modal-in {
+  animation: mm-modal-in 320ms var(--mm-ease-spring) both;
+}
+
 .mm-feedback-in {
   animation: mm-feedback-in 260ms var(--mm-ease-out) both;
 }
@@ -269,6 +277,28 @@ body::after {
   100% {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes mm-modal-overlay-in {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes mm-modal-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.975);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 

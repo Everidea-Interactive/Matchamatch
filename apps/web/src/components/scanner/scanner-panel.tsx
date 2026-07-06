@@ -148,7 +148,7 @@ export function ScannerPanel({
       >
         {status}
       </p>
-      <div className="relative mb-3 aspect-[3/4] overflow-hidden rounded-[26px] border border-[rgba(255,255,255,0.52)] bg-[#231c16] sm:aspect-[4/3]">
+      <div className="relative mb-3 aspect-[5/6] overflow-hidden rounded-[26px] border border-[rgba(255,255,255,0.52)] bg-[#231c16] sm:aspect-[4/3]">
         <video
           ref={videoRef}
           autoPlay

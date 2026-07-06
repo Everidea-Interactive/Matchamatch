@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { seedOnboardingSeen } from "./storage";
 
 const PROFILE_STORAGE_KEY = "matchamatch.profile.v1";
 
@@ -48,6 +49,7 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     window.localStorage.clear();
   });
+  await seedOnboardingSeen(page);
 });
 
 async function mockCamera(page: Page) {
@@ -185,6 +187,7 @@ test("tab switch clears pending sort selection state", async ({ page }) => {
 });
 
 test("tab switch keeps shell height stable", async ({ page }) => {
+  await mockCamera(page);
   await page.goto("/");
   await page.waitForTimeout(500);
 
@@ -194,7 +197,7 @@ test("tab switch keeps shell height stable", async ({ page }) => {
   });
 
   await page.getByRole("button", { name: "Go" }).click();
-  await expect(page.getByText("Camera Ready")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Capture" })).toBeEnabled();
 
   const goHeight = await shell.evaluate((element) => {
     return element.getBoundingClientRect().height;

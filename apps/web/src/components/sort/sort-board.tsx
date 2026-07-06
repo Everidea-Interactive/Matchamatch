@@ -54,7 +54,7 @@ export function SortBoard({
   });
   const cupRows = Math.ceil(sortState.cups.length / 3);
   const boardStyle = {
-    "--mm-cup-height": `max(5.4rem, min(11rem, calc((100svh - 23.5rem) / ${cupRows})))`,
+    "--mm-cup-height": `max(5.4rem, min(11rem, calc((100svh - 26rem) / ${cupRows})))`,
   } as CSSProperties;
 
   return (

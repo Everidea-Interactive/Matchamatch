@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { seedOnboardingSeen } from "./storage";
 
 async function mockCamera(page: Parameters<typeof test>[0]["page"]) {
   await page.addInitScript(() => {
@@ -50,6 +51,7 @@ test("scanner capture path awards points and unlocks skins", async ({
   page,
 }) => {
   await mockCamera(page);
+  await seedOnboardingSeen(page);
 
   await page.goto("/");
   await page.getByRole("button", { name: "Go" }).click();
@@ -62,6 +64,7 @@ test("scanner capture path awards points and unlocks skins", async ({
 
 test("desktop scanner keeps camera flip toggle hidden", async ({ page }) => {
   await mockCamera(page);
+  await seedOnboardingSeen(page);
 
   await page.goto("/");
   await page.getByRole("button", { name: "Go" }).click();
@@ -79,6 +82,7 @@ test.describe("mobile scanner controls", () => {
 
   test("mobile scanner shows camera flip toggle", async ({ page }) => {
     await mockCamera(page);
+    await seedOnboardingSeen(page);
 
     await page.goto("/");
     await page.getByRole("button", { name: "Go" }).click();
