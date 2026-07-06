@@ -166,12 +166,17 @@ export function ScannerPanel({
         ) : null}
         <button
           aria-label={`Switch to ${nextFacingMode === "environment" ? "back" : "front"} camera`}
-          className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full border border-[rgba(255,255,255,0.34)] bg-[rgba(252,246,238,0.18)] text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--mm-page-mist)] backdrop-blur-sm transition hover:bg-[rgba(252,246,238,0.26)] disabled:cursor-not-allowed disabled:opacity-35 sm:hidden"
+          className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-35 sm:hidden"
           disabled={!isCameraActive}
           onClick={toggleCameraFacingMode}
           type="button"
         >
-          Flip
+          <img
+            alt=""
+            aria-hidden="true"
+            className="h-8 w-8 invert drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
+            src="/icons/camera-rotate-svgrepo-com.svg"
+          />
         </button>
         <div className="absolute inset-x-0 bottom-5 flex justify-center">
           <button
