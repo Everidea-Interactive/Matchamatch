@@ -10,6 +10,10 @@ const quicksand = Quicksand({
 export const metadata: Metadata = {
   title: "Matchamatch",
   description: "ASMR sorting puzzle with scanner mode",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
