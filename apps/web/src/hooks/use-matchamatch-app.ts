@@ -11,8 +11,10 @@ import {
   applyLevelReward,
   attemptPour,
   canPour,
+  completeDailyGame,
   createSortState,
   loadProfile,
+  resetAfterDailyGameScan,
   resetProfileProgressAfterRetryExhaustion,
   restartSortState,
   restoreRetryBudget,
@@ -44,6 +46,9 @@ function createLevelState(levelIndex: number) {
   return createSortState(level.cups, level.moveLimit);
 }
 
+const DAILY_GAME_COMPLETED_MESSAGE =
+  "Daily game complete. Scan a drink in Go to start another game.";
+
 function getFailureMessage(failedProfile: LocalProfile) {
   if (failedProfile.retryBudgetRemaining === 0) {
     return "Move limit reached! No retries left. Capture Matcha in Go for +1 retry, or go back to Cafe Level 1.";
@@ -58,6 +63,14 @@ function createExhaustedRetryState(levelIndex: number) {
     message:
       "Move limit reached! No retries left. Capture Matcha in Go for +1 retry, or go back to Cafe Level 1.",
     status: "failed" as const,
+  };
+}
+
+function createCompletedDailyGameState(levelIndex: number) {
+  return {
+    ...createLevelState(levelIndex),
+    message: DAILY_GAME_COMPLETED_MESSAGE,
+    status: "won" as const,
   };
 }
 
@@ -146,14 +159,19 @@ export function useMatchamatchApp() {
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const nextProfile = loadProfile(window.localStorage);
+    const isDailyGameCompleted = nextProfile.dailyGameCompleted;
     const isRetryCaptureRequired = nextProfile.retryBudgetRemaining === 0;
     setProfile(nextProfile);
     setCurrentBoardLevelIndex(nextProfile.currentLevelIndex);
     setPendingRetryRescueLevelIndex(
-      isRetryCaptureRequired ? nextProfile.currentLevelIndex : null,
+      isDailyGameCompleted || !isRetryCaptureRequired
+        ? null
+        : nextProfile.currentLevelIndex,
     );
     setSortState(
-      isRetryCaptureRequired
+      isDailyGameCompleted
+        ? createCompletedDailyGameState(nextProfile.currentLevelIndex)
+        : isRetryCaptureRequired
         ? createExhaustedRetryState(nextProfile.currentLevelIndex)
         : createLevelState(nextProfile.currentLevelIndex),
     );
@@ -277,6 +295,23 @@ export function useMatchamatchApp() {
     if (nextState.status === "won" && profile) {
       emitSortFeedback("success", sourceIndex, index);
       setSortState(nextState);
+
+      if (currentBoardLevelIndex === LEVELS.length - 1) {
+        const nextProfile = completeDailyGame(profile);
+        levelAdvanceTimeoutRef.current = window.setTimeout(() => {
+          setProfile(nextProfile);
+          setCurrentBoardLevelIndex(nextProfile.currentLevelIndex);
+          resetSortFeedback();
+          setSortState(
+            createCompletedDailyGameState(nextProfile.currentLevelIndex),
+          );
+          setScorePulseKey((current) => current + 1);
+          levelAdvanceTimeoutRef.current = null;
+        }, 260);
+
+        return;
+      }
+
       setIsAdvancingLevel(true);
 
       const nextProfile = applyLevelReward(profile);
@@ -333,6 +368,10 @@ export function useMatchamatchApp() {
     setActiveTab("go");
   }
 
+  function openCompletedDailyGameScanFlow() {
+    setActiveTab("go");
+  }
+
   function resetToLevelOne() {
     setProfile((current) => {
       if (!current) {
@@ -352,6 +391,7 @@ export function useMatchamatchApp() {
 
   function applyScannerResult(result: MatchaDetection) {
     const retryRescueLevelIndex = pendingRetryRescueLevelIndex;
+    const shouldResetCompletedDailyGame = profile?.dailyGameCompleted === true;
 
     setProfile((current) => {
       if (!current) {
@@ -359,10 +399,13 @@ export function useMatchamatchApp() {
       }
 
       const rewardedProfile = applyCaptureReward(current, result.isMatcha);
-      const nextProfile =
+      const rescuedProfile =
         retryRescueLevelIndex === null
           ? rewardedProfile
           : restoreRetryBudget(rewardedProfile);
+      const nextProfile = shouldResetCompletedDailyGame
+        ? resetAfterDailyGameScan(rescuedProfile)
+        : rescuedProfile;
       const unlockedSkins = SKINS.filter(
         (skin) =>
           !current.unlockedSkins.includes(skin.id) &&
@@ -398,6 +441,14 @@ export function useMatchamatchApp() {
       resetSortFeedback();
       setSortState(createLevelState(retryRescueLevelIndex));
       setActiveTabState("sort");
+      return;
+    }
+
+    if (shouldResetCompletedDailyGame) {
+      setCurrentBoardLevelIndex(0);
+      resetSortFeedback();
+      setSortState(createLevelState(0));
+      setActiveTabState("sort");
     }
   }
 
@@ -407,6 +458,7 @@ export function useMatchamatchApp() {
     applyScannerResult,
     currentBoardLevelIndex,
     onCupPress,
+    openCompletedDailyGameScanFlow,
     openRetryCaptureFlow,
     pendingRetryRescueLevelIndex,
     profile,

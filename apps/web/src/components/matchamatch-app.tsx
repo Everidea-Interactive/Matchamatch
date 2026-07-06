@@ -22,6 +22,7 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
     applyScannerResult,
     currentBoardLevelIndex,
     onCupPress,
+    openCompletedDailyGameScanFlow,
     openRetryCaptureFlow,
     pendingRetryRescueLevelIndex,
     profile,
@@ -177,11 +178,13 @@ export function MatchamatchApp({ mode }: { mode: "full" | "embed" }) {
                 activeLevel={activeLevel}
                 activeLevelIndex={currentBoardLevelIndex}
                 onCupPress={onCupPress}
+                onOpenCompletedDailyGameScan={openCompletedDailyGameScanFlow}
                 onOpenRetryCapture={openRetryCaptureFlow}
                 onRestart={restartLevel}
                 onResetToLevelOne={resetToLevelOne}
                 onTryAgain={tryAgain}
                 onUndo={undoMove}
+                isDailyGameCompleted={profile.dailyGameCompleted}
                 pendingRetryRescueLevelIndex={pendingRetryRescueLevelIndex}
                 profile={profile}
                 scorePulseKey={scorePulseKey}

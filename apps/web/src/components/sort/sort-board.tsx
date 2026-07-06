@@ -14,11 +14,13 @@ export function SortBoard({
   activeLevel,
   activeLevelIndex,
   onCupPress,
+  onOpenCompletedDailyGameScan,
   onOpenRetryCapture,
   onRestart,
   onResetToLevelOne,
   onTryAgain,
   onUndo,
+  isDailyGameCompleted,
   pendingRetryRescueLevelIndex,
   profile,
   scorePulseKey,
@@ -28,17 +30,45 @@ export function SortBoard({
   activeLevel: LevelDefinition;
   activeLevelIndex: number;
   onCupPress: (index: number) => void;
+  onOpenCompletedDailyGameScan: () => void;
   onOpenRetryCapture: () => void;
   onRestart: () => void;
   onResetToLevelOne: () => void;
   onTryAgain: () => void;
   onUndo: () => void;
+  isDailyGameCompleted: boolean;
   pendingRetryRescueLevelIndex: number | null;
   profile: LocalProfile;
   scorePulseKey: number;
   sortState: SortState;
   sortFeedbackEvent: SortFeedbackEvent;
 }) {
+  if (isDailyGameCompleted) {
+    return (
+      <section className="mm-card-sheen relative overflow-hidden rounded-[30px] border border-white/72 bg-[linear-gradient(180deg,var(--mm-card-top),var(--mm-card-bottom))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_18px_40px_rgba(var(--mm-shadow-rgb),0.1)] sm:rounded-[34px] sm:p-6">
+        <div className="rounded-[28px] border border-white/70 bg-[radial-gradient(circle_at_top,rgba(239,246,229,0.9),rgba(244,235,221,0.98))] p-6 text-center shadow-[0_18px_40px_rgba(var(--mm-shadow-rgb),0.12)] sm:p-8">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--mm-muted)]">
+            Daily Complete
+          </p>
+          <h1 className="mt-3 text-[1.9rem] leading-[0.98] font-bold tracking-[-0.05em] text-[var(--mm-ink-strong)] sm:text-[2.2rem]">
+            Daily game already completed
+          </h1>
+          <p className="mt-4 text-sm leading-6 font-medium text-[var(--mm-ink)] sm:text-base">
+            Scan a drink in Go to start another game.
+          </p>
+          <button
+            aria-label="Scan a Drink"
+            className="mm-button mt-6 w-full rounded-[16px] bg-[linear-gradient(180deg,var(--mm-sage),var(--mm-sage-deep))] px-4 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(123,141,93,0.22)] sm:rounded-[18px] sm:text-base sm:shadow-[0_16px_30px_rgba(123,141,93,0.22)]"
+            onClick={onOpenCompletedDailyGameScan}
+            type="button"
+          >
+            Scan a Drink
+          </button>
+        </div>
+      </section>
+    );
+  }
+
   const showFailureModal = sortState.status === "failed";
   const isRetryCaptureRequired =
     pendingRetryRescueLevelIndex !== null && profile.retryBudgetRemaining === 0;
@@ -86,6 +116,7 @@ export function SortBoard({
                   Daily Score
                 </p>
                 <p
+                  data-testid="daily-score"
                   key={`score-${scorePulseKey}`}
                   className={`mt-1 text-[1.8rem] leading-none font-bold text-[#5b4736] sm:text-[2rem] ${
                     scorePulseKey > 0 ? "mm-score-pop" : ""

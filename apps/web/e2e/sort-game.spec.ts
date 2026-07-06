@@ -7,6 +7,7 @@ const DEFAULT_PROFILE = {
   activeSkin: "skin-zen",
   captureCount: 0,
   currentLevelIndex: 0,
+  dailyGameCompleted: false,
   dailyScore: 150,
   dailyStreak: 4,
   retryBudgetRemaining: 3,
@@ -43,6 +44,21 @@ const LEVEL_FOUR_FAILURE_MOVES: Array<[number, number]> = [
   [5, 4],
   [4, 5],
   [5, 4],
+];
+
+const LEVEL_FIVE_WINNING_MOVES: Array<[number, number]> = [
+  [0, 5],
+  [1, 6],
+  [2, 6],
+  [2, 5],
+  [0, 2],
+  [3, 0],
+  [3, 5],
+  [1, 3],
+  [0, 1],
+  [4, 3],
+  [4, 6],
+  [2, 4],
 ];
 
 test.beforeEach(async ({ page }) => {
@@ -223,6 +239,40 @@ test("winning level 1 loads fresh level 2 board without spawned cup", async ({
   );
   await expect(page.getByTestId("cup-3")).toContainText("Empty");
   await expect(page.getByTestId("cup-4")).toHaveCount(0);
+});
+
+test("clearing level 5 locks Sort with completed daily game state", async ({
+  page,
+}) => {
+  await seedProfile(page, {
+    currentLevelIndex: 4,
+  });
+  await page.goto("/");
+
+  await playMoves(page, LEVEL_FIVE_WINNING_MOVES);
+
+  await expect(page.getByText("Daily game already completed")).toBeVisible();
+  await expect(
+    page.getByText("Scan a drink in Go to start another game."),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Scan a Drink" })).toBeVisible();
+  await expect(page.getByTestId("cup-0")).toHaveCount(0);
+});
+
+test("completed daily game persists across reload", async ({ page }) => {
+  await seedProfile(page, {
+    currentLevelIndex: 4,
+    dailyGameCompleted: true,
+    dailyScore: 200,
+  });
+  await page.goto("/");
+
+  await expect(page.getByText("Daily game already completed")).toBeVisible();
+  await expect(
+    page.getByText("Scan a drink in Go to start another game."),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Scan a Drink" })).toBeVisible();
+  await expect(page.getByTestId("cup-0")).toHaveCount(0);
 });
 
 test("failed level locks board and Try Again resets same level with spent retry", async ({

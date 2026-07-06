@@ -4,7 +4,9 @@ import {
   DEFAULT_RETRY_BUDGET,
   applyCaptureReward,
   applyFailurePenalty,
+  completeDailyGame,
   loadProfile,
+  resetAfterDailyGameScan,
   resetProfileProgressAfterRetryExhaustion,
   restoreRetryBudget,
   saveProfile,
@@ -41,6 +43,7 @@ describe("profile", () => {
     });
 
     expect(profile.retryBudgetRemaining).toBe(DEFAULT_RETRY_BUDGET);
+    expect(profile.dailyGameCompleted).toBe(false);
   });
 
   it("saves updated profile state", () => {
@@ -74,6 +77,19 @@ describe("profile", () => {
     expect(exhaustedProfile.retryBudgetRemaining).toBe(0);
   });
 
+  it("marks daily game complete after final clear", () => {
+    const completedProfile = completeDailyGame({
+      ...DEFAULT_PROFILE,
+      currentLevelIndex: 4,
+      retryBudgetRemaining: 1,
+    });
+
+    expect(completedProfile.dailyGameCompleted).toBe(true);
+    expect(completedProfile.dailyScore).toBe(DEFAULT_PROFILE.dailyScore + 50);
+    expect(completedProfile.currentLevelIndex).toBe(4);
+    expect(completedProfile.retryBudgetRemaining).toBe(1);
+  });
+
   it("resets progress after retry exhaustion", () => {
     const resetProfile = resetProfileProgressAfterRetryExhaustion({
       ...DEFAULT_PROFILE,
@@ -94,5 +110,22 @@ describe("profile", () => {
 
     expect(rescuedProfile.retryBudgetRemaining).toBe(1);
     expect(cappedProfile.retryBudgetRemaining).toBe(DEFAULT_RETRY_BUDGET);
+  });
+
+  it("resets completed daily game after scanner capture", () => {
+    const resetProfile = resetAfterDailyGameScan({
+      ...DEFAULT_PROFILE,
+      dailyGameCompleted: true,
+      currentLevelIndex: 4,
+      retryBudgetRemaining: 0,
+      dailyScore: 350,
+      unlockedSkins: ["skin-zen", "skin-sakura"],
+    });
+
+    expect(resetProfile.dailyGameCompleted).toBe(false);
+    expect(resetProfile.currentLevelIndex).toBe(0);
+    expect(resetProfile.retryBudgetRemaining).toBe(DEFAULT_RETRY_BUDGET);
+    expect(resetProfile.dailyScore).toBe(350);
+    expect(resetProfile.unlockedSkins).toEqual(["skin-zen", "skin-sakura"]);
   });
 });

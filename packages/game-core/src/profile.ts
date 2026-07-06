@@ -10,6 +10,7 @@ export interface LocalProfile {
   version: 1;
   retryBudgetRemaining: number;
   currentLevelIndex: number;
+  dailyGameCompleted: boolean;
   dailyScore: number;
   dailyStreak: number;
   captureCount: number;
@@ -24,6 +25,7 @@ export const DEFAULT_PROFILE: LocalProfile = {
   version: 1,
   retryBudgetRemaining: DEFAULT_RETRY_BUDGET,
   currentLevelIndex: 0,
+  dailyGameCompleted: false,
   dailyScore: 150,
   dailyStreak: 4,
   captureCount: 0,
@@ -66,6 +68,8 @@ export function loadProfile(storage: StorageLike): LocalProfile {
       currentLevelIndex: clampLevelIndex(
         parsed.currentLevelIndex ?? DEFAULT_PROFILE.currentLevelIndex,
       ),
+      dailyGameCompleted:
+        parsed.dailyGameCompleted ?? DEFAULT_PROFILE.dailyGameCompleted,
       retryBudgetRemaining:
         parsed.retryBudgetRemaining ?? DEFAULT_PROFILE.retryBudgetRemaining,
       unlockedSkins: normalizeUnlockedSkins(parsed.unlockedSkins),
@@ -86,6 +90,15 @@ export function applyLevelReward(profile: LocalProfile): LocalProfile {
     ...profile,
     dailyScore: profile.dailyScore + 50,
     currentLevelIndex: clampLevelIndex(profile.currentLevelIndex + 1),
+  };
+}
+
+export function completeDailyGame(profile: LocalProfile): LocalProfile {
+  return {
+    ...profile,
+    dailyGameCompleted: true,
+    dailyScore: profile.dailyScore + 50,
+    currentLevelIndex: LEVELS.length - 1,
   };
 }
 
@@ -116,6 +129,15 @@ export function restoreRetryBudget(
       profile.retryBudgetRemaining + retryCount,
       DEFAULT_RETRY_BUDGET,
     ),
+  };
+}
+
+export function resetAfterDailyGameScan(profile: LocalProfile): LocalProfile {
+  return {
+    ...profile,
+    currentLevelIndex: 0,
+    dailyGameCompleted: false,
+    retryBudgetRemaining: DEFAULT_RETRY_BUDGET,
   };
 }
 
