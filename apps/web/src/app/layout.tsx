@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
+import { AudioSettingsProvider } from "@/hooks/use-game-audio";
 import "./globals.css";
 
 const quicksand = Quicksand({
@@ -24,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={quicksand.variable}>
       <body className="min-h-screen antialiased">
-        {children}
+        <AudioSettingsProvider>{children}</AudioSettingsProvider>
       </body>
     </html>
   );

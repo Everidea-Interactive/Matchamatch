@@ -1,7 +1,8 @@
 "use client";
 
+import { useAudioSettings } from "@/hooks/use-game-audio";
 import Link from "next/link";
-import { useMemo, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 const primaryMenuItems = [
   {
@@ -34,7 +35,7 @@ const secondaryMenuItems = [
 ] as const;
 
 export function AccountPage() {
-  const memberNumber = useMemo(() => createRandomMemberNumber(), []);
+  const { isSupported, musicEnabled, setMusicEnabled } = useAudioSettings();
   const accumulatedPoints = "1,240";
 
   return (
@@ -69,7 +70,7 @@ export function AccountPage() {
                   Matcha Guest
                 </p>
                 <p className="mt-1 text-[0.98rem] font-medium text-[var(--mm-muted)] sm:text-[1.02rem]">
-                  {memberNumber}
+                  {MEMBER_NUMBER}
                 </p>
               </div>
               <button
@@ -131,6 +132,44 @@ export function AccountPage() {
           </article>
 
           <MenuCard items={primaryMenuItems} />
+          <article className="mm-card-sheen rounded-[28px] border border-white/72 bg-[linear-gradient(180deg,var(--mm-card-top),var(--mm-card-bottom))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_18px_40px_rgba(var(--mm-shadow-rgb),0.1)] sm:rounded-[32px] sm:p-5">
+            <div className="flex items-center gap-4">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] bg-[linear-gradient(180deg,var(--mm-sage-soft),rgba(184,201,157,0.9))] text-[var(--mm-sage-deep)] shadow-[0_10px_22px_rgba(123,141,93,0.15)]">
+                <SparkIcon />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[1.02rem] font-semibold text-[var(--mm-ink-strong)] sm:text-[1.08rem]">
+                  Background Music
+                </p>
+                <p className="mt-1 text-[0.92rem] text-[var(--mm-muted)] sm:text-[0.96rem]">
+                  {isSupported
+                    ? musicEnabled
+                      ? "Soft ambient loop enabled."
+                      : "Ambient loop muted."
+                    : "Audio unavailable on this browser right now."}
+                </p>
+              </div>
+              <button
+                aria-checked={musicEnabled}
+                aria-label="Background Music"
+                className={`mm-button relative flex h-8 w-14 shrink-0 rounded-full border transition-colors duration-200 ${
+                  musicEnabled
+                    ? "border-[rgba(132,149,107,0.42)] bg-[linear-gradient(180deg,var(--mm-sage-soft),rgba(184,201,157,0.95))]"
+                    : "border-[var(--mm-border)] bg-[rgba(234,224,213,0.92)]"
+                }`}
+                onClick={() => setMusicEnabled(!musicEnabled)}
+                role="switch"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  className={`absolute top-0.5 h-6 w-6 rounded-full bg-[var(--mm-surface-raised)] shadow-[0_8px_18px_rgba(var(--mm-shadow-rgb),0.16)] transition-transform duration-200 ${
+                    musicEnabled ? "translate-x-[1.6rem]" : "translate-x-0.5"
+                  }`}
+                />
+              </button>
+            </div>
+          </article>
           <MenuCard items={secondaryMenuItems} />
         </section>
       </div>
@@ -138,9 +177,7 @@ export function AccountPage() {
   );
 }
 
-function createRandomMemberNumber() {
-  return Array.from({ length: 13 }, () => Math.floor(Math.random() * 10)).join("");
-}
+const MEMBER_NUMBER = "9551668071374";
 
 function MenuCard({
   items,
